@@ -25,6 +25,14 @@ namespace ComputerGraphics_3
         private CheckBox LKMCheckBox;
 
         public bool debug;
+
+        // Для отслеживания дельт перетаскивания
+        private int startX = 0;
+        private int startY = 0;
+        private int wheelDelta = 0;
+        private bool isDragging = false;
+        private MouseButtons draggingButton = MouseButtons.None;
+
         private string Console
         {
             get
@@ -37,16 +45,19 @@ namespace ComputerGraphics_3
                     MouseConsole.WriteLine(value);
             }
         }
+
         public void ConnectStream(InputOutputStream mouseIO)
         {
             MouseConsole = mouseIO;
         }
+
         public void ConnectCheckBox(CheckBox RKMCheckBoxIO, CheckBox MKMCheckBoxIO, CheckBox LKMCheckBoxIO)
         {
             RKMCheckBox = RKMCheckBoxIO;
             MKMCheckBox = MKMCheckBoxIO;
             LKMCheckBox = LKMCheckBoxIO;
         }
+
         public void ConnectEvents(Form Window)
         {
             Window.MouseClick += this.MouseClick;
@@ -54,6 +65,7 @@ namespace ComputerGraphics_3
             Window.MouseUp += this.MouseUp;
             Window.MouseMove += this.MouseMove;
             Window.MouseDoubleClick += this.MouseDoubleClick;
+            Window.MouseWheel += this.MouseWheel;
             SubscribeAllControls(Window);
         }
 
@@ -61,14 +73,13 @@ namespace ComputerGraphics_3
         {
             foreach (Control control in parent.Controls)
             {
-                // Подписываем каждый контрол
                 control.MouseClick += this.MouseClick;
                 control.MouseDown += this.MouseDown;
                 control.MouseUp += this.MouseUp;
                 control.MouseMove += this.MouseMove;
                 control.MouseDoubleClick += this.MouseDoubleClick;
+                control.MouseWheel += this.MouseWheel;
 
-                // Рекурсивно для вложенных контролов
                 if (control.HasChildren)
                 {
                     SubscribeAllControls(control);
@@ -76,77 +87,120 @@ namespace ComputerGraphics_3
             }
         }
 
-        //main
         private void MouseDown(object sender, MouseEventArgs e)
         {
             string button = GetButtonName(e.Button);
+
+            isDragging = true;
+            draggingButton = e.Button;
+            startX = e.X;
+            startY = e.Y;
+
             Console = $"MouseDown: {button} ({e.X}, {e.Y})";
             SetCheckBox(e.Button, true);
-
         }
-        //main
+
         private void MouseUp(object sender, MouseEventArgs e)
         {
-            SetCheckBox(e.Button, false );
+            SetCheckBox(e.Button, false);
             string button = GetButtonName(e.Button);
+
+            if (isDragging && draggingButton == e.Button)
+            {
+                int deltaX = e.X - startX;
+                int deltaY = e.Y - startY;
+                if (deltaX != 0 || deltaY != 0)
+                {
+                    Console = $"Drag: {button} Delta({deltaX:+0;-0;0}, {deltaY:+0;-0;0})";
+                }
+                isDragging = false;
+            }
+
             Console = $"MouseUp: {button} ({e.X}, {e.Y})";
         }
-        //main
+
         private void MouseMove(object sender, MouseEventArgs e)
         {
             string button = GetButtonName(e.Button);
+
+            // Обычное движение мыши
             Console = $"MouseMove: {button} ({e.X}, {e.Y})";
+
+            // Дельта от точки нажатия при перетаскивании
+            if (isDragging && e.Button == draggingButton)
+            {
+                int deltaX = e.X - startX;
+                int deltaY = e.Y - startY;
+                Console = $"DragDelta: {GetButtonName(draggingButton)} ({deltaX:+0;-0;0}, {deltaY:+0;-0;0})";
+            }
         }
 
-        //slave
         private void MouseClick(object sender, MouseEventArgs e)
         {
             string button = GetButtonName(e.Button);
-            Console = $"MouseClick: {button}  ({e.X}, {e.Y})";
+            Console = $"MouseClick: {button} ({e.X}, {e.Y})";
         }
-        //slave
+
         private void MouseDoubleClick(object sender, MouseEventArgs e)
         {
             string button = GetButtonName(e.Button);
-            Console = $"MouseDoubleClick: {button}  ({e.X}, {e.Y})";
+            Console = $"MouseDoubleClick: {button} ({e.X}, {e.Y})";
         }
 
+        private void MouseWheel(object sender, MouseEventArgs e)
+        {
+            int delta = e.Delta;
+            wheelDelta += delta;
+            string direction = delta > 0 ? "Up" : "Down";
+            Console = $"MouseWheel: {direction} Delta({delta:+0;-0;0})";
+        }
 
         private string GetButtonName(MouseButtons button)
         {
             switch (button)
             {
                 case MouseButtons.Left:
-                    return "Left";
+                    return "L";
                 case MouseButtons.Right:
-                    return "Right";
+                    return "R";
                 case MouseButtons.Middle:
-                    return "Middle";
+                    return "M";
                 default:
                     return "-";
             }
         }
+
         private void SetCheckBox(MouseButtons button, bool state)
         {
             switch (button)
             {
                 case MouseButtons.Left:
-                    RKMCheckBox.Checked = state;
-                    break;
-
-                case MouseButtons.Right:
-                    MKMCheckBox.Checked = state;
-                    break;
-
-                case MouseButtons.Middle:
                     LKMCheckBox.Checked = state;
                     break;
-
+                case MouseButtons.Right:
+                    RKMCheckBox.Checked = state;
+                    break;
+                case MouseButtons.Middle:
+                    MKMCheckBox.Checked = state;
+                    break;
                 default:
                     return;
             }
         }
+
+        public int GetWheelDelta()
+        {
+            return wheelDelta;
+        }
+
+        public void ResetWheelDelta()
+        {
+            wheelDelta = 0;
+        }
+
+        public bool IsDragging()
+        {
+            return isDragging;
+        }
     }
-
-
 }
