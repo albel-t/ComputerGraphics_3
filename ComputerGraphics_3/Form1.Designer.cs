@@ -38,46 +38,52 @@
             this.label_Y_coord = new System.Windows.Forms.Label();
             this.label_X_coord = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.label7 = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
+            this.textBoxCameraY = new System.Windows.Forms.TextBox();
+            this.textBoxCameraX = new System.Windows.Forms.TextBox();
+            this.buttonRebuildWindow = new System.Windows.Forms.Button();
+            this.textBoxChuncksCountInput = new System.Windows.Forms.TextBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.label1 = new System.Windows.Forms.Label();
+            this.pictureBoxRotateCamera = new System.Windows.Forms.PictureBox();
             this.richTextBoxFigurePropertyOut = new System.Windows.Forms.RichTextBox();
             this.button2 = new System.Windows.Forms.Button();
             this.buttonEdit = new System.Windows.Forms.Button();
             this.comboBoxTypeOfObject = new System.Windows.Forms.ComboBox();
             this.labelTypeFigure = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.label2 = new System.Windows.Forms.Label();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.buttonTextureOpen = new System.Windows.Forms.Button();
             this.TexturePictureBox = new System.Windows.Forms.PictureBox();
             this.openFileDialog_Texture = new System.Windows.Forms.OpenFileDialog();
             this.directorySearcher1 = new System.DirectoryServices.DirectorySearcher();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
-            this.pictureBox2 = new System.Windows.Forms.PictureBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
-            this.textBoxChuncksCountInput = new System.Windows.Forms.TextBox();
-            this.buttonRebuildWindow = new System.Windows.Forms.Button();
-            this.label2 = new System.Windows.Forms.Label();
+            this.pictureBoxScreen = new System.Windows.Forms.PictureBox();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
-            this.comboBoxFigures = new System.Windows.Forms.ComboBox();
-            this.label4 = new System.Windows.Forms.Label();
             this.buttonClearAll = new System.Windows.Forms.Button();
-            this.textBoxCameraX = new System.Windows.Forms.TextBox();
-            this.textBoxCameraY = new System.Windows.Forms.TextBox();
-            this.label5 = new System.Windows.Forms.Label();
-            this.label6 = new System.Windows.Forms.Label();
-            this.label7 = new System.Windows.Forms.Label();
+            this.label4 = new System.Windows.Forms.Label();
+            this.comboBoxFigures = new System.Windows.Forms.ComboBox();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
-            this.richTextBoxLogsOut = new System.Windows.Forms.RichTextBox();
-            this.buttonSave = new System.Windows.Forms.Button();
             this.buttonLoad = new System.Windows.Forms.Button();
+            this.buttonSave = new System.Windows.Forms.Button();
+            this.richTextBoxLogsOut = new System.Windows.Forms.RichTextBox();
+            this.pictureBoxAllScreen = new System.Windows.Forms.PictureBox();
+            this.pictureBoxVisiblePartAllScreen = new System.Windows.Forms.PictureBox();
+            this.pictureBoxVisibleShadow = new System.Windows.Forms.PictureBox();
             this.MouseGroupBox.SuspendLayout();
             this.groupBox1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxRotateCamera)).BeginInit();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.TexturePictureBox)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxScreen)).BeginInit();
             this.groupBox4.SuspendLayout();
             this.groupBox5.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxAllScreen)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxVisiblePartAllScreen)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxVisibleShadow)).BeginInit();
             this.SuspendLayout();
             // 
             // MouseGroupBox
@@ -182,13 +188,96 @@
             this.groupBox1.Controls.Add(this.textBoxChuncksCountInput);
             this.groupBox1.Controls.Add(this.label3);
             this.groupBox1.Controls.Add(this.label1);
-            this.groupBox1.Controls.Add(this.pictureBox2);
+            this.groupBox1.Controls.Add(this.pictureBoxRotateCamera);
             this.groupBox1.Location = new System.Drawing.Point(727, 15);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(183, 237);
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Screen";
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(19, 197);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(43, 13);
+            this.label7.TabIndex = 13;
+            this.label7.Text = "Camera";
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(68, 211);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(20, 13);
+            this.label5.TabIndex = 8;
+            this.label5.Text = "Y: ";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(68, 184);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(20, 13);
+            this.label6.TabIndex = 7;
+            this.label6.Text = "X: ";
+            // 
+            // textBoxCameraY
+            // 
+            this.textBoxCameraY.Location = new System.Drawing.Point(92, 207);
+            this.textBoxCameraY.Name = "textBoxCameraY";
+            this.textBoxCameraY.Size = new System.Drawing.Size(50, 20);
+            this.textBoxCameraY.TabIndex = 12;
+            // 
+            // textBoxCameraX
+            // 
+            this.textBoxCameraX.Location = new System.Drawing.Point(92, 181);
+            this.textBoxCameraX.Name = "textBoxCameraX";
+            this.textBoxCameraX.Size = new System.Drawing.Size(50, 20);
+            this.textBoxCameraX.TabIndex = 11;
+            // 
+            // buttonRebuildWindow
+            // 
+            this.buttonRebuildWindow.Location = new System.Drawing.Point(94, 84);
+            this.buttonRebuildWindow.Name = "buttonRebuildWindow";
+            this.buttonRebuildWindow.Size = new System.Drawing.Size(75, 23);
+            this.buttonRebuildWindow.TabIndex = 10;
+            this.buttonRebuildWindow.Text = "Rebuild";
+            this.buttonRebuildWindow.UseVisualStyleBackColor = true;
+            // 
+            // textBoxChuncksCountInput
+            // 
+            this.textBoxChuncksCountInput.Location = new System.Drawing.Point(94, 52);
+            this.textBoxChuncksCountInput.Name = "textBoxChuncksCountInput";
+            this.textBoxChuncksCountInput.Size = new System.Drawing.Size(63, 20);
+            this.textBoxChuncksCountInput.TabIndex = 9;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(91, 36);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(51, 13);
+            this.label3.TabIndex = 8;
+            this.label3.Text = "chuncks:";
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(15, 21);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(39, 13);
+            this.label1.TabIndex = 7;
+            this.label1.Text = "Rotate";
+            // 
+            // pictureBoxRotateCamera
+            // 
+            this.pictureBoxRotateCamera.Location = new System.Drawing.Point(18, 37);
+            this.pictureBoxRotateCamera.Name = "pictureBoxRotateCamera";
+            this.pictureBoxRotateCamera.Size = new System.Drawing.Size(70, 70);
+            this.pictureBoxRotateCamera.TabIndex = 0;
+            this.pictureBoxRotateCamera.TabStop = false;
             // 
             // richTextBoxFigurePropertyOut
             // 
@@ -250,6 +339,15 @@
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Property";
             // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(15, 53);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(25, 13);
+            this.label2.TabIndex = 8;
+            this.label2.Text = "Info";
+            // 
             // groupBox3
             // 
             this.groupBox3.Controls.Add(this.buttonTextureOpen);
@@ -290,64 +388,13 @@
             this.directorySearcher1.ServerPageTimeLimit = System.TimeSpan.Parse("-00:00:01");
             this.directorySearcher1.ServerTimeLimit = System.TimeSpan.Parse("-00:00:01");
             // 
-            // pictureBox1
+            // pictureBoxScreen
             // 
-            this.pictureBox1.Location = new System.Drawing.Point(12, 23);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(709, 547);
-            this.pictureBox1.TabIndex = 4;
-            this.pictureBox1.TabStop = false;
-            // 
-            // pictureBox2
-            // 
-            this.pictureBox2.Location = new System.Drawing.Point(18, 37);
-            this.pictureBox2.Name = "pictureBox2";
-            this.pictureBox2.Size = new System.Drawing.Size(70, 70);
-            this.pictureBox2.TabIndex = 0;
-            this.pictureBox2.TabStop = false;
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(15, 21);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(39, 13);
-            this.label1.TabIndex = 7;
-            this.label1.Text = "Rotate";
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(91, 36);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(51, 13);
-            this.label3.TabIndex = 8;
-            this.label3.Text = "chuncks:";
-            // 
-            // textBoxChuncksCountInput
-            // 
-            this.textBoxChuncksCountInput.Location = new System.Drawing.Point(94, 52);
-            this.textBoxChuncksCountInput.Name = "textBoxChuncksCountInput";
-            this.textBoxChuncksCountInput.Size = new System.Drawing.Size(63, 20);
-            this.textBoxChuncksCountInput.TabIndex = 9;
-            // 
-            // buttonRebuildWindow
-            // 
-            this.buttonRebuildWindow.Location = new System.Drawing.Point(94, 84);
-            this.buttonRebuildWindow.Name = "buttonRebuildWindow";
-            this.buttonRebuildWindow.Size = new System.Drawing.Size(75, 23);
-            this.buttonRebuildWindow.TabIndex = 10;
-            this.buttonRebuildWindow.Text = "Rebuild";
-            this.buttonRebuildWindow.UseVisualStyleBackColor = true;
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(15, 53);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(25, 13);
-            this.label2.TabIndex = 8;
-            this.label2.Text = "Info";
+            this.pictureBoxScreen.Location = new System.Drawing.Point(12, 23);
+            this.pictureBoxScreen.Name = "pictureBoxScreen";
+            this.pictureBoxScreen.Size = new System.Drawing.Size(507, 547);
+            this.pictureBoxScreen.TabIndex = 4;
+            this.pictureBoxScreen.TabStop = false;
             // 
             // groupBox4
             // 
@@ -361,13 +408,14 @@
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Objects";
             // 
-            // comboBoxFigures
+            // buttonClearAll
             // 
-            this.comboBoxFigures.FormattingEnabled = true;
-            this.comboBoxFigures.Location = new System.Drawing.Point(6, 41);
-            this.comboBoxFigures.Name = "comboBoxFigures";
-            this.comboBoxFigures.Size = new System.Drawing.Size(121, 21);
-            this.comboBoxFigures.TabIndex = 0;
+            this.buttonClearAll.Location = new System.Drawing.Point(6, 68);
+            this.buttonClearAll.Name = "buttonClearAll";
+            this.buttonClearAll.Size = new System.Drawing.Size(75, 23);
+            this.buttonClearAll.TabIndex = 2;
+            this.buttonClearAll.Text = "Clear";
+            this.buttonClearAll.UseVisualStyleBackColor = true;
             // 
             // label4
             // 
@@ -378,55 +426,13 @@
             this.label4.TabIndex = 1;
             this.label4.Text = "current figure";
             // 
-            // buttonClearAll
+            // comboBoxFigures
             // 
-            this.buttonClearAll.Location = new System.Drawing.Point(6, 68);
-            this.buttonClearAll.Name = "buttonClearAll";
-            this.buttonClearAll.Size = new System.Drawing.Size(75, 23);
-            this.buttonClearAll.TabIndex = 2;
-            this.buttonClearAll.Text = "Clear";
-            this.buttonClearAll.UseVisualStyleBackColor = true;
-            // 
-            // textBoxCameraX
-            // 
-            this.textBoxCameraX.Location = new System.Drawing.Point(92, 181);
-            this.textBoxCameraX.Name = "textBoxCameraX";
-            this.textBoxCameraX.Size = new System.Drawing.Size(50, 20);
-            this.textBoxCameraX.TabIndex = 11;
-            // 
-            // textBoxCameraY
-            // 
-            this.textBoxCameraY.Location = new System.Drawing.Point(92, 207);
-            this.textBoxCameraY.Name = "textBoxCameraY";
-            this.textBoxCameraY.Size = new System.Drawing.Size(50, 20);
-            this.textBoxCameraY.TabIndex = 12;
-            // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(68, 211);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(20, 13);
-            this.label5.TabIndex = 8;
-            this.label5.Text = "Y: ";
-            // 
-            // label6
-            // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(68, 184);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(20, 13);
-            this.label6.TabIndex = 7;
-            this.label6.Text = "X: ";
-            // 
-            // label7
-            // 
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(19, 197);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(43, 13);
-            this.label7.TabIndex = 13;
-            this.label7.Text = "Camera";
+            this.comboBoxFigures.FormattingEnabled = true;
+            this.comboBoxFigures.Location = new System.Drawing.Point(6, 41);
+            this.comboBoxFigures.Name = "comboBoxFigures";
+            this.comboBoxFigures.Size = new System.Drawing.Size(121, 21);
+            this.comboBoxFigures.TabIndex = 0;
             // 
             // groupBox5
             // 
@@ -440,13 +446,14 @@
             this.groupBox5.TabStop = false;
             this.groupBox5.Text = "Logs";
             // 
-            // richTextBoxLogsOut
+            // buttonLoad
             // 
-            this.richTextBoxLogsOut.Location = new System.Drawing.Point(6, 19);
-            this.richTextBoxLogsOut.Name = "richTextBoxLogsOut";
-            this.richTextBoxLogsOut.Size = new System.Drawing.Size(463, 186);
-            this.richTextBoxLogsOut.TabIndex = 0;
-            this.richTextBoxLogsOut.Text = "";
+            this.buttonLoad.Location = new System.Drawing.Point(87, 211);
+            this.buttonLoad.Name = "buttonLoad";
+            this.buttonLoad.Size = new System.Drawing.Size(75, 23);
+            this.buttonLoad.TabIndex = 2;
+            this.buttonLoad.Text = "Load";
+            this.buttonLoad.UseVisualStyleBackColor = true;
             // 
             // buttonSave
             // 
@@ -457,23 +464,49 @@
             this.buttonSave.Text = "Save";
             this.buttonSave.UseVisualStyleBackColor = true;
             // 
-            // buttonLoad
+            // richTextBoxLogsOut
             // 
-            this.buttonLoad.Location = new System.Drawing.Point(87, 211);
-            this.buttonLoad.Name = "buttonLoad";
-            this.buttonLoad.Size = new System.Drawing.Size(75, 23);
-            this.buttonLoad.TabIndex = 2;
-            this.buttonLoad.Text = "Load";
-            this.buttonLoad.UseVisualStyleBackColor = true;
+            this.richTextBoxLogsOut.Location = new System.Drawing.Point(6, 19);
+            this.richTextBoxLogsOut.Name = "richTextBoxLogsOut";
+            this.richTextBoxLogsOut.Size = new System.Drawing.Size(463, 186);
+            this.richTextBoxLogsOut.TabIndex = 0;
+            this.richTextBoxLogsOut.Text = "";
+            // 
+            // pictureBoxAllScreen
+            // 
+            this.pictureBoxAllScreen.Location = new System.Drawing.Point(537, 36);
+            this.pictureBoxAllScreen.Name = "pictureBoxAllScreen";
+            this.pictureBoxAllScreen.Size = new System.Drawing.Size(168, 151);
+            this.pictureBoxAllScreen.TabIndex = 2;
+            this.pictureBoxAllScreen.TabStop = false;
+            // 
+            // pictureBoxVisiblePartAllScreen
+            // 
+            this.pictureBoxVisiblePartAllScreen.Location = new System.Drawing.Point(537, 226);
+            this.pictureBoxVisiblePartAllScreen.Name = "pictureBoxVisiblePartAllScreen";
+            this.pictureBoxVisiblePartAllScreen.Size = new System.Drawing.Size(168, 151);
+            this.pictureBoxVisiblePartAllScreen.TabIndex = 7;
+            this.pictureBoxVisiblePartAllScreen.TabStop = false;
+            // 
+            // pictureBoxVisibleShadow
+            // 
+            this.pictureBoxVisibleShadow.Location = new System.Drawing.Point(537, 419);
+            this.pictureBoxVisibleShadow.Name = "pictureBoxVisibleShadow";
+            this.pictureBoxVisibleShadow.Size = new System.Drawing.Size(168, 151);
+            this.pictureBoxVisibleShadow.TabIndex = 8;
+            this.pictureBoxVisibleShadow.TabStop = false;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1403, 582);
+            this.Controls.Add(this.pictureBoxVisibleShadow);
+            this.Controls.Add(this.pictureBoxVisiblePartAllScreen);
+            this.Controls.Add(this.pictureBoxAllScreen);
             this.Controls.Add(this.groupBox5);
             this.Controls.Add(this.groupBox4);
-            this.Controls.Add(this.pictureBox1);
+            this.Controls.Add(this.pictureBoxScreen);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
@@ -484,15 +517,18 @@
             this.MouseGroupBox.PerformLayout();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxRotateCamera)).EndInit();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
             this.groupBox3.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.TexturePictureBox)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxScreen)).EndInit();
             this.groupBox4.ResumeLayout(false);
             this.groupBox4.PerformLayout();
             this.groupBox5.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxAllScreen)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxVisiblePartAllScreen)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxVisibleShadow)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -520,9 +556,9 @@
         private System.Windows.Forms.PictureBox TexturePictureBox;
         private System.Windows.Forms.OpenFileDialog openFileDialog_Texture;
         private System.DirectoryServices.DirectorySearcher directorySearcher1;
-        private System.Windows.Forms.PictureBox pictureBox1;
+        private System.Windows.Forms.PictureBox pictureBoxScreen;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.PictureBox pictureBox2;
+        private System.Windows.Forms.PictureBox pictureBoxRotateCamera;
         private System.Windows.Forms.TextBox textBoxChuncksCountInput;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Button buttonRebuildWindow;
@@ -540,6 +576,9 @@
         private System.Windows.Forms.Button buttonSave;
         private System.Windows.Forms.RichTextBox richTextBoxLogsOut;
         private System.Windows.Forms.Button buttonLoad;
+        private System.Windows.Forms.PictureBox pictureBoxAllScreen;
+        private System.Windows.Forms.PictureBox pictureBoxVisiblePartAllScreen;
+        private System.Windows.Forms.PictureBox pictureBoxVisibleShadow;
     }
 }
 
