@@ -16,12 +16,24 @@ namespace ComputerGraphics_3
         {
             InitializeComponent();
 
+
+            InputOutputTextbox mouseConsole = new InputOutputTextbox();
+            mouseConsole.Connect(richTextBoxMouseLogs);
+
+            MouseCapture mouseInput = new MouseCapture();
+            mouseInput.debug = true;
+            mouseInput.ConnectEvents(this);
+            mouseInput.ConnectStream(mouseConsole);
+            mouseInput.ConnectCheckBox(RKMCheckBox, MKMCheckBox, LKMCheckBox);
+
+
+
             // Добавляем начальный куб
             sceneObjects.Add(new Cube(1, "Куб 4x4x4", new Vector3(0, 0, 0), 2, Color.White));
-            UpdateObjectList();
+            //UpdateObjectList();
 
             lastRenderTime = DateTime.Now;
-            Render();
+            //Render();
         }
 
         private void buttonTextureOpen_Click(object sender, EventArgs e)
@@ -56,7 +68,7 @@ namespace ComputerGraphics_3
         private DateTime lastRenderTime;
         private int frameCount = 0;
 
-
+        /*
         private void AddObject()
         {
             float x, y, z, size;
@@ -234,6 +246,31 @@ namespace ComputerGraphics_3
 
             return new Ray(cameraPos, rayDir);
         }
-    }
 
+
+        */
+    }
+    public class InputOutputTextbox : InputOutputStream
+    {
+        RichTextBox console;
+        string InputOutputStream.ReadLine()
+        {
+            if (console.Lines.Length == 0)
+                return string.Empty;
+
+            return console.Lines[console.Lines.Length - 1];
+        }
+        void InputOutputStream.WriteLine(string line)
+        {
+            console.AppendText(line + Environment.NewLine);
+        }
+        public void Connect(RichTextBox consoleTextBox)
+        {
+            console = consoleTextBox;
+            console.BackColor = Color.Black;
+            console.ForeColor = Color.LimeGreen;
+            console.Font = new Font("Consolas", 10);
+            console.ScrollBars = RichTextBoxScrollBars.Vertical;
+        }
+    }
 }
