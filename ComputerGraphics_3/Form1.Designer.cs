@@ -38,6 +38,7 @@
             this.label_Y_coord = new System.Windows.Forms.Label();
             this.label_X_coord = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.labelFPS = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
@@ -49,7 +50,7 @@
             this.label1 = new System.Windows.Forms.Label();
             this.pictureBoxRotateCamera = new System.Windows.Forms.PictureBox();
             this.richTextBoxFigurePropertyOut = new System.Windows.Forms.RichTextBox();
-            this.button2 = new System.Windows.Forms.Button();
+            this.buttonAdd = new System.Windows.Forms.Button();
             this.buttonEdit = new System.Windows.Forms.Button();
             this.comboBoxTypeOfObject = new System.Windows.Forms.ComboBox();
             this.labelTypeFigure = new System.Windows.Forms.Label();
@@ -179,6 +180,7 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.labelFPS);
             this.groupBox1.Controls.Add(this.label7);
             this.groupBox1.Controls.Add(this.label5);
             this.groupBox1.Controls.Add(this.label6);
@@ -195,6 +197,15 @@
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Screen";
+            // 
+            // labelFPS
+            // 
+            this.labelFPS.AutoSize = true;
+            this.labelFPS.Location = new System.Drawing.Point(12, 146);
+            this.labelFPS.Name = "labelFPS";
+            this.labelFPS.Size = new System.Drawing.Size(49, 13);
+            this.labelFPS.TabIndex = 14;
+            this.labelFPS.Text = "labelFPS";
             // 
             // label7
             // 
@@ -287,14 +298,14 @@
             this.richTextBoxFigurePropertyOut.TabIndex = 7;
             this.richTextBoxFigurePropertyOut.Text = "";
             // 
-            // button2
+            // buttonAdd
             // 
-            this.button2.Location = new System.Drawing.Point(11, 174);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(75, 23);
-            this.button2.TabIndex = 3;
-            this.button2.Text = "Add";
-            this.button2.UseVisualStyleBackColor = true;
+            this.buttonAdd.Location = new System.Drawing.Point(11, 174);
+            this.buttonAdd.Name = "buttonAdd";
+            this.buttonAdd.Size = new System.Drawing.Size(75, 23);
+            this.buttonAdd.TabIndex = 3;
+            this.buttonAdd.Text = "Add";
+            this.buttonAdd.UseVisualStyleBackColor = true;
             // 
             // buttonEdit
             // 
@@ -328,7 +339,7 @@
             // 
             this.groupBox2.Controls.Add(this.label2);
             this.groupBox2.Controls.Add(this.richTextBoxFigurePropertyOut);
-            this.groupBox2.Controls.Add(this.button2);
+            this.groupBox2.Controls.Add(this.buttonAdd);
             this.groupBox2.Controls.Add(this.labelTypeFigure);
             this.groupBox2.Controls.Add(this.buttonEdit);
             this.groupBox2.Controls.Add(this.comboBoxTypeOfObject);
@@ -546,7 +557,7 @@
         private System.Windows.Forms.RichTextBox richTextBoxMouseLogs;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.Label labelTypeFigure;
-        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Button buttonAdd;
         private System.Windows.Forms.Button buttonEdit;
         private System.Windows.Forms.ComboBox comboBoxTypeOfObject;
         private System.Windows.Forms.GroupBox groupBox2;
@@ -579,6 +590,7 @@
         private System.Windows.Forms.PictureBox pictureBoxAllScreen;
         private System.Windows.Forms.PictureBox pictureBoxVisiblePartAllScreen;
         private System.Windows.Forms.PictureBox pictureBoxVisibleShadow;
+        private System.Windows.Forms.Label labelFPS;
     }
 }
 

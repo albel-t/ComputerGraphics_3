@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -12,10 +13,37 @@ namespace ComputerGraphics_3
 {
     public partial class Form1 : Form
     {
+
+        private float cameraAngle = 0;
+
+
+        private double cameraAngleX = 0;
+        private double cameraAngleY = 0;
+        private double cameraDistance = 15;
+        private int screenWidth;
+        private int screenHeight;
+        private int renderResolution = 100;
+
+        // Для управления камерой мышью
+        private bool isDragging = false;
+        private int lastMouseX = 0;
+        private int lastMouseY = 0;
+
+        // Список всех объектов в сцене
+        private List<SceneObject> sceneObjects = new List<SceneObject>();
+        private int nextObjectId = 1;
+        private SceneObject activeObject = null;
+
+        private DateTime lastRenderTime;
+        private int frameCount = 0;
+
         public Form1()
         {
             InitializeComponent();
 
+
+            screenWidth = pictureBoxScreen.Width;
+            screenHeight = pictureBoxScreen.Height;
 
             InputOutputTextbox mouseConsole = new InputOutputTextbox();
             mouseConsole.Connect(richTextBoxMouseLogs);
@@ -26,14 +54,33 @@ namespace ComputerGraphics_3
             mouseInput.ConnectStream(mouseConsole);
             mouseInput.ConnectCheckBox(RKMCheckBox, MKMCheckBox, LKMCheckBox);
 
+            //InitializeUI();
+            InitializeMouseCapture();
+            comboBoxFigures.SelectedIndexChanged += ComboBoxFigures_SelectedIndexChanged;
+            buttonRebuildWindow.Click += (s, e) => { ApplyRenderResolution(); };
+
+            //this.Controls.Add(pictureBoxScreen);
+            //this.Controls.Add(textBoxCameraX);
+            //this.Controls.Add(textBoxCameraY);
+            //this.Controls.Add(textBoxChuncksCountInput);
+            //this.Controls.Add(buttonRebuildWindow);
+            //this.Controls.Add(labelFPS);
+            //this.Controls.Add(comboBoxFigures);
+            //this.Controls.Add(buttonAdd);
+            //this.Controls.Add(buttonEdit);
+            //this.Controls.Add(richTextBoxFigurePropertyOut);
 
 
-            // Добавляем начальный куб
-            sceneObjects.Add(new Cube(1, "Куб 4x4x4", new Vector3(0, 0, 0), 2, Color.White));
-            //UpdateObjectList();
+            // Добавляем начальные объекты
+            sceneObjects.Add(new Cube(1, "Cube1", new Vector3(-2, -2, -2), 2, Color.Red));
+            sceneObjects.Add(new Sphere(2, "Sphere1", new Vector3(2, 2, 2), 1.5f, Color.Blue));
+            nextObjectId = 3;
+
+            UpdateObjectsList();
+            UpdateActiveObjectDisplay();
 
             lastRenderTime = DateTime.Now;
-            //Render();
+            Render();
         }
 
         private void buttonTextureOpen_Click(object sender, EventArgs e)
@@ -54,97 +101,249 @@ namespace ComputerGraphics_3
 
             }
         }
-
-        private float cameraAngle = 0;
-        private float cameraDistance = 15;
-        private int screenWidth = 400;
-        private int screenHeight = 400;
-        private int renderResolution = 100;
-
-        // Список всех объектов в сцене
-        private List<SceneObject> sceneObjects = new List<SceneObject>();
-        private int nextObjectId = 1;
-
-        private DateTime lastRenderTime;
-        private int frameCount = 0;
-
         /*
-        private void AddObject()
+        private void InitializeUI()
         {
-            float x, y, z, size;
+            pictureBoxScreen = new PictureBox();
+            pictureBoxScreen.Location = new Point(10, 10);
+            pictureBoxScreen.Size = new Size(screenWidth, screenHeight);
+            pictureBoxScreen.BackColor = Color.Black;
+            pictureBoxScreen.BorderStyle = BorderStyle.FixedSingle;
 
-            if (float.TryParse(textBoxObjX.Text, out x) &&
-                float.TryParse(textBoxObjY.Text, out y) &&
-                float.TryParse(textBoxObjZ.Text, out z) &&
-                float.TryParse(textBoxObjRadius.Text, out size) && size > 0)
+            textBoxCameraX = new TextBox();
+            textBoxCameraX.Location = new Point(420, 10);
+            textBoxCameraX.Size = new Size(100, 20);
+            textBoxCameraX.ReadOnly = true;
+
+            textBoxCameraY = new TextBox();
+            textBoxCameraY.Location = new Point(420, 40);
+            textBoxCameraY.Size = new Size(100, 20);
+            textBoxCameraY.ReadOnly = true;
+
+            // Поле для ввода разрешения рендеринга (chunks)
+            Label labelRes = new Label() { Text = "Chunks:", Location = new Point(420, 80), Size = new Size(50, 20) };
+            textBoxChuncksCountInput = new TextBox() { Text = "100", Location = new Point(470, 80), Size = new Size(50, 20) };
+
+            buttonRebuildWindow = new Button() { Text = "Apply", Location = new Point(420, 110), Size = new Size(100, 30) };
+            buttonRebuildWindow.Click += (s, e) => { ApplyRenderResolution(); };
+
+            labelFPS = new Label() { Text = "FPS: --", Location = new Point(420, 150), Size = new Size(150, 20) };
+
+            // ComboBox для выбора объектов
+            Label labelFigures = new Label() { Text = "Figures:", Location = new Point(420, 190), Size = new Size(50, 20) };
+            comboBoxFigures = new ComboBox() { Location = new Point(470, 190), Size = new Size(150, 20) };
+            comboBoxFigures.DropDownStyle = ComboBoxStyle.DropDownList;
+            comboBoxFigures.SelectedIndexChanged += ComboBoxFigures_SelectedIndexChanged;
+
+            // Кнопка добавления
+            buttonAdd = new Button() { Text = "Add NEW", Location = new Point(420, 220), Size = new Size(100, 30) };
+            buttonAdd.Click += (s, e) => { AddNewObject(); };
+
+            // Кнопка редактирования
+            buttonEdit = new Button() { Text = "Edit", Location = new Point(530, 220), Size = new Size(90, 30) };
+            buttonEdit.Click += (s, e) => { EditActiveObject(); };
+
+            // RichTextBox для вывода свойств
+            Label labelProperties = new Label() { Text = "Properties:", Location = new Point(420, 260), Size = new Size(70, 20) };
+            richTextBoxFigurePropertyOut = new RichTextBox() { Location = new Point(420, 280), Size = new Size(200, 200) };
+            richTextBoxFigurePropertyOut.Font = new Font("Consolas", 9);
+
+            this.Controls.Add(pictureBoxScreen);
+            this.Controls.Add(textBoxCameraX);
+            this.Controls.Add(textBoxCameraY);
+            this.Controls.Add(labelRes);
+            this.Controls.Add(textBoxChuncksCountInput);
+            this.Controls.Add(buttonRebuildWindow);
+            this.Controls.Add(labelFPS);
+            this.Controls.Add(labelFigures);
+            this.Controls.Add(comboBoxFigures);
+            this.Controls.Add(buttonAdd);
+            this.Controls.Add(buttonEdit);
+            this.Controls.Add(labelProperties);
+            this.Controls.Add(richTextBoxFigurePropertyOut);
+        }
+        */
+        private void InitializeMouseCapture()
+        {
+            pictureBoxScreen.MouseDown += PictureBox_MouseDown;
+            pictureBoxScreen.MouseUp += PictureBox_MouseUp;
+            pictureBoxScreen.MouseMove += PictureBox_MouseMove;
+        }
+
+        private void PictureBox_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
             {
-                Random rand = new Random();
-                Color randomColor = Color.FromArgb(rand.Next(100, 255), rand.Next(100, 255), rand.Next(100, 255));
+                isDragging = true;
+                lastMouseX = e.X;
+                lastMouseY = e.Y;
+            }
+        }
 
-                SceneObject newObject = null;
+        private void PictureBox_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                isDragging = false;
+            }
+        }
 
-                if (comboBoxObjType.SelectedItem.ToString() == "Sphere")
-                {
-                    newObject = new Sphere(nextObjectId++, $"Сфера {nextObjectId - 1}", new Vector3(x, y, z), size, randomColor);
-                }
-                else
-                {
-                    newObject = new Cube(nextObjectId++, $"Куб {nextObjectId - 1}", new Vector3(x, y, z), size, randomColor);
-                }
+        private void PictureBox_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (isDragging)
+            {
+                int deltaX = e.X - lastMouseX;
+                int deltaY = e.Y - lastMouseY;
 
-                sceneObjects.Add(newObject);
-                UpdateObjectList();
+                cameraAngleX += deltaX * 0.01;
+                cameraAngleY += deltaY * 0.01;
+
+                // Ограничиваем угол по вертикали
+                cameraAngleY = Math.Max(-Math.PI / 2.1, Math.Min(Math.PI / 2.1, cameraAngleY));
+
+                lastMouseX = e.X;
+                lastMouseY = e.Y;
+
+                UpdateCameraPosition();
                 Render();
+            }
+        }
+
+        private void UpdateCameraPosition()
+        {
+            // Сферические координаты камеры
+            float cameraX = (float)(Math.Cos(cameraAngleY) * Math.Cos(cameraAngleX) * cameraDistance);
+            float cameraY = (float)(Math.Cos(cameraAngleY) * Math.Sin(cameraAngleX) * cameraDistance);
+            float cameraZ = (float)(Math.Sin(cameraAngleY) * cameraDistance) + 5;
+
+            textBoxCameraX.Text = $"X: {cameraX:F2}";
+            textBoxCameraY.Text = $"Y: {cameraY:F2}";
+        }
+
+        private void AddNewObject()
+        {
+            Random rand = new Random();
+            Color randomColor = Color.FromArgb(rand.Next(100, 255), rand.Next(100, 255), rand.Next(100, 255));
+
+            // По умолчанию создаем сферу
+            Sphere newSphere = new Sphere(nextObjectId++, $"NewObject{nextObjectId - 1}", new Vector3(0, 0, 0), 1, randomColor);
+            sceneObjects.Add(newSphere);
+            activeObject = newSphere;
+
+            UpdateObjectsList();
+            UpdateActiveObjectDisplay();
+            Render();
+        }
+
+        private void EditActiveObject()
+        {
+            if (activeObject == null) return;
+
+            string text = richTextBoxFigurePropertyOut.Text;
+
+            // Парсим имя
+            Match nameMatch = Regex.Match(text, @"Name:(\S+)");
+            if (nameMatch.Success)
+            {
+                activeObject.Name = nameMatch.Groups[1].Value;
+            }
+
+            // Парсим размер/радиус
+            Match sizeMatch = Regex.Match(text, @"Size[^:]*:\s*([\d.-]+)");
+            if (sizeMatch.Success)
+            {
+                float newSize = float.Parse(sizeMatch.Groups[1].Value, System.Globalization.CultureInfo.InvariantCulture);
+                activeObject.Size = Math.Max(0.1f, newSize);
+            }
+
+            // Парсим координаты
+            Match xMatch = Regex.Match(text, @"Location\.x:([\d.-]+)");
+            Match yMatch = Regex.Match(text, @"Location\.y:([\d.-]+)");
+            Match zMatch = Regex.Match(text, @"Location\.z:([\d.-]+)");
+
+            if (xMatch.Success && yMatch.Success && zMatch.Success)
+            {
+                float newX = float.Parse(xMatch.Groups[1].Value, System.Globalization.CultureInfo.InvariantCulture);
+                float newY = float.Parse(yMatch.Groups[1].Value, System.Globalization.CultureInfo.InvariantCulture);
+                float newZ = float.Parse(zMatch.Groups[1].Value, System.Globalization.CultureInfo.InvariantCulture);
+                activeObject.Position = new Vector3(newX, newY, newZ);
+            }
+
+            UpdateObjectsList();
+            UpdateActiveObjectDisplay();
+            Render();
+        }
+
+        private void UpdateObjectsList()
+        {
+            comboBoxFigures.Items.Clear();
+            foreach (var obj in sceneObjects)
+            {
+                comboBoxFigures.Items.Add(obj);
+            }
+            comboBoxFigures.Items.Add("NEW");
+
+            if (activeObject != null)
+            {
+                int index = sceneObjects.FindIndex(o => o.Id == activeObject.Id);
+                if (index >= 0)
+                    comboBoxFigures.SelectedIndex = index;
+                else
+                    comboBoxFigures.SelectedIndex = comboBoxFigures.Items.Count - 1;
             }
             else
             {
-                MessageBox.Show("Введите корректные координаты и размер (размер > 0)");
+                comboBoxFigures.SelectedIndex = comboBoxFigures.Items.Count - 1;
             }
         }
 
-        private void RemoveObject()
+        private void ComboBoxFigures_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (listBoxObjects.SelectedItem != null)
+            if (comboBoxFigures.SelectedItem == null) return;
+
+            if (comboBoxFigures.SelectedItem.ToString() == "NEW")
             {
-                int id = (int)listBoxObjects.SelectedItem;
-                var obj = sceneObjects.Find(o => o.Id == id);
-                if (obj != null && obj.Name != "Куб 4x4x4")
-                {
-                    sceneObjects.Remove(obj);
-                    UpdateObjectList();
-                    Render();
-                }
-                else if (obj != null && obj.Name == "Куб 4x4x4")
-                {
-                    MessageBox.Show("Нельзя удалить базовый куб");
-                }
+                AddNewObject();
+            }
+            else
+            {
+                activeObject = comboBoxFigures.SelectedItem as SceneObject;
+                UpdateActiveObjectDisplay();
             }
         }
 
-        private void UpdateObjectList()
+        private void UpdateActiveObjectDisplay()
         {
-            listBoxObjects.Items.Clear();
-            foreach (var obj in sceneObjects)
+            if (activeObject == null)
             {
-                listBoxObjects.Items.Add(obj.Id);
+                richTextBoxFigurePropertyOut.Text = "";
+                return;
             }
 
-            listBoxObjects.Format += (s, e) =>
-            {
-                int id = (int)e.ListItem;
-                var obj = sceneObjects.Find(o => o.Id == id);
-                if (obj != null)
-                {
-                    e.Value = obj.ToString();
-                }
-            };
-            listBoxObjects.Invalidate();
+            string type = activeObject is Cube ? "Cube" : "Sphere";
+            string sizeLabel = activeObject is Cube ? "Size" : "Radius";
+
+            richTextBoxFigurePropertyOut.Text =
+                $"Name:{activeObject.Name}\r\n" +
+                $"Type:{type}\r\n" +
+                $"{sizeLabel}\r\n" +
+                $"{{\r\n" +
+                $"    {sizeLabel}.x:{activeObject.Size:F2}\r\n" +
+                $"    {sizeLabel}.y:{activeObject.Size:F2}\r\n" +
+                $"    {sizeLabel}.z:{activeObject.Size:F2}\r\n" +
+                $"}}\r\n" +
+                $"Location\r\n" +
+                $"{{\r\n" +
+                $"    Location.x:{activeObject.Position.X:F2}\r\n" +
+                $"    Location.y:{activeObject.Position.Y:F2}\r\n" +
+                $"    Location.z:{activeObject.Position.Z:F2}\r\n" +
+                $"}}";
         }
 
         private void ApplyRenderResolution()
         {
             int newRes;
-            if (int.TryParse(textBoxResolution.Text, out newRes) && newRes >= 1 && newRes <= screenWidth)
+            if (int.TryParse(textBoxChuncksCountInput.Text, out newRes) && newRes >= 1 && newRes <= screenWidth)
             {
                 renderResolution = newRes;
                 Render();
@@ -157,16 +356,13 @@ namespace ComputerGraphics_3
 
         private void Render()
         {
-            DateTime startTime = DateTime.Now;
-
-            float cameraX = (float)(Math.Cos(cameraAngle) * cameraDistance);
-            float cameraY = (float)(Math.Sin(cameraAngle) * cameraDistance);
-            float cameraZ = 8;
-
-            textBoxCameraX.Text = $"X: {cameraX:F2}";
-            textBoxCameraY.Text = $"Y: {cameraY:F2}";
+            UpdateCameraPosition();
 
             Bitmap bmp = new Bitmap(screenWidth, screenHeight);
+
+            float cameraX = float.Parse(textBoxCameraX.Text.Replace("X: ", ""));
+            float cameraY = float.Parse(textBoxCameraY.Text.Replace("Y: ", ""));
+            float cameraZ = (float)(Math.Sin(cameraAngleY) * cameraDistance) + 5;
 
             Vector3 cameraPos = new Vector3(cameraX, cameraY, cameraZ);
 
@@ -218,7 +414,7 @@ namespace ComputerGraphics_3
             TimeSpan elapsed = DateTime.Now - lastRenderTime;
             if (elapsed.TotalSeconds >= 1)
             {
-                labelFPS.Text = $"FPS: {frameCount} | Res: {renderResolution}x{renderResolution} | Objs: {sceneObjects.Count}";
+                labelFPS.Text = $"FPS: {frameCount} | Chunks: {renderResolution} | Objs: {sceneObjects.Count}";
                 frameCount = 0;
                 lastRenderTime = DateTime.Now;
             }
@@ -228,7 +424,7 @@ namespace ComputerGraphics_3
         {
             Vector3 target = new Vector3(0, 0, 0);
             Vector3 forward = (target - cameraPos).Normalize();
-            Vector3 realUp = new Vector3(0, 1, 0);
+            Vector3 realUp = new Vector3(0, 0, 1);
             Vector3 realRight = Vector3.Cross(realUp, forward).Normalize();
             Vector3 realUpCorrected = Vector3.Cross(forward, realRight).Normalize();
 
@@ -246,9 +442,6 @@ namespace ComputerGraphics_3
 
             return new Ray(cameraPos, rayDir);
         }
-
-
-        */
     }
     public class InputOutputTextbox : InputOutputStream
     {
@@ -263,6 +456,7 @@ namespace ComputerGraphics_3
         void InputOutputStream.WriteLine(string line)
         {
             console.AppendText(line + Environment.NewLine);
+            console.ScrollToCaret();
         }
         public void Connect(RichTextBox consoleTextBox)
         {
