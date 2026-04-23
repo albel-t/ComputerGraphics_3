@@ -26,7 +26,6 @@ namespace ComputerGraphics_3
 
         public bool debug;
 
-        // Для отслеживания дельт перетаскивания
         private int startX = 0;
         private int startY = 0;
         private int wheelDelta = 0;
@@ -123,10 +122,8 @@ namespace ComputerGraphics_3
         {
             string button = GetButtonName(e.Button);
 
-            // Обычное движение мыши
             Console = $"MouseMove: {button} ({e.X}, {e.Y})";
 
-            // Дельта от точки нажатия при перетаскивании
             if (isDragging && e.Button == draggingButton)
             {
                 int deltaX = e.X - startX;

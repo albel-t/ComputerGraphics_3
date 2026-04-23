@@ -7,8 +7,6 @@ using System.Threading.Tasks;
 
 namespace ComputerGraphics_3
 {
-
-    // Базовый абстрактный класс
     public abstract class SceneObject
     {
         public int Id { get; set; }
@@ -27,7 +25,7 @@ namespace ComputerGraphics_3
         }
 
         public abstract bool Intersect(Ray ray, out float t, out Vector3 hitPoint);
-        public abstract Color GetColor(Vector3 hitPoint);
+        public abstract Color GetColor(Vector3 hitPoint, bool ColorIs = true);
 
         public override string ToString()
         {
@@ -35,7 +33,6 @@ namespace ComputerGraphics_3
         }
     }
 
-    // Класс Cube
     public class Cube : SceneObject
     {
         public Cube(int id, string name, Vector3 position, float size, Color color)
@@ -82,7 +79,7 @@ namespace ComputerGraphics_3
             return false;
         }
 
-        public override Color GetColor(Vector3 hitPoint)
+        public override Color GetColor(Vector3 hitPoint, bool ColorIs = true)
         {
             float eps = 0.01f;
             float cubeMinX = Position.X - Size;
@@ -93,17 +90,16 @@ namespace ComputerGraphics_3
             float cubeMaxZ = Position.Z + Size;
 
             if (Math.Abs(hitPoint.X - cubeMinX) < eps || Math.Abs(hitPoint.X - cubeMaxX) < eps)
-                return Color.Red;
+                return ColorIs ? Color.Red : Color.Gray;
             if (Math.Abs(hitPoint.Y - cubeMinY) < eps || Math.Abs(hitPoint.Y - cubeMaxY) < eps)
-                return Color.Green;
+                return ColorIs ? Color.Green : Color.Gray;
             if (Math.Abs(hitPoint.Z - cubeMinZ) < eps || Math.Abs(hitPoint.Z - cubeMaxZ) < eps)
-                return Color.Blue;
+                return ColorIs ? Color.Blue : Color.Gray; 
 
             return Color.White;
         }
     }
 
-    // Класс Sphere
     public class Sphere : SceneObject
     {
         public Sphere(int id, string name, Vector3 position, float radius, Color color)
@@ -137,12 +133,10 @@ namespace ComputerGraphics_3
             return true;
         }
 
-        public override Color GetColor(Vector3 hitPoint)
+        public override Color GetColor(Vector3 hitPoint, bool ColorIs = true)
         {
-            // Вычисляем нормаль для затенения
             Vector3 normal = (hitPoint - Position).Normalize();
 
-            // Простое затенение на основе нормали
             float shade = (normal.X + normal.Y + normal.Z) / 3 + 0.5f;
             shade = Math.Max(0.2f, Math.Min(1.0f, shade));
 
@@ -154,7 +148,6 @@ namespace ComputerGraphics_3
         }
     }
 
-    // Вспомогательные структуры
     public struct Vector3
     {
         public float X, Y, Z;
@@ -166,7 +159,10 @@ namespace ComputerGraphics_3
             if (len < 0.0001f) return new Vector3(0, 0, 1);
             return new Vector3(X / len, Y / len, Z / len);
         }
-
+        public float Length()
+        {
+            return (float)Math.Sqrt(X * X + Y * Y + Z * Z);
+        }
         public static float Dot(Vector3 a, Vector3 b) => a.X * b.X + a.Y * b.Y + a.Z * b.Z;
 
         public static Vector3 Cross(Vector3 a, Vector3 b)

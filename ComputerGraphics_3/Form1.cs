@@ -24,12 +24,10 @@ namespace ComputerGraphics_3
         private int screenHeight;
         private int renderResolution = 100;
 
-        // Для управления камерой мышью
         private bool isDragging = false;
         private int lastMouseX = 0;
         private int lastMouseY = 0;
 
-        // Список всех объектов в сцене
         private List<SceneObject> sceneObjects = new List<SceneObject>();
         private int nextObjectId = 1;
         private SceneObject activeObject = null;
@@ -58,20 +56,10 @@ namespace ComputerGraphics_3
             InitializeMouseCapture();
             comboBoxFigures.SelectedIndexChanged += ComboBoxFigures_SelectedIndexChanged;
             buttonRebuildWindow.Click += (s, e) => { ApplyRenderResolution(); };
-
-            //this.Controls.Add(pictureBoxScreen);
-            //this.Controls.Add(textBoxCameraX);
-            //this.Controls.Add(textBoxCameraY);
-            //this.Controls.Add(textBoxChuncksCountInput);
-            //this.Controls.Add(buttonRebuildWindow);
-            //this.Controls.Add(labelFPS);
-            //this.Controls.Add(comboBoxFigures);
-            //this.Controls.Add(buttonAdd);
-            //this.Controls.Add(buttonEdit);
-            //this.Controls.Add(richTextBoxFigurePropertyOut);
+            buttonEdit.Click += (s, e) => { EditActiveObject(); };
+            buttonAdd.Click += (s, e) => { AddNewObject(); };
 
 
-            // Добавляем начальные объекты
             sceneObjects.Add(new Cube(1, "Cube1", new Vector3(-2, -2, -2), 2, Color.Red));
             sceneObjects.Add(new Sphere(2, "Sphere1", new Vector3(2, 2, 2), 1.5f, Color.Blue));
             nextObjectId = 3;
@@ -101,73 +89,12 @@ namespace ComputerGraphics_3
 
             }
         }
-        /*
-        private void InitializeUI()
-        {
-            pictureBoxScreen = new PictureBox();
-            pictureBoxScreen.Location = new Point(10, 10);
-            pictureBoxScreen.Size = new Size(screenWidth, screenHeight);
-            pictureBoxScreen.BackColor = Color.Black;
-            pictureBoxScreen.BorderStyle = BorderStyle.FixedSingle;
-
-            textBoxCameraX = new TextBox();
-            textBoxCameraX.Location = new Point(420, 10);
-            textBoxCameraX.Size = new Size(100, 20);
-            textBoxCameraX.ReadOnly = true;
-
-            textBoxCameraY = new TextBox();
-            textBoxCameraY.Location = new Point(420, 40);
-            textBoxCameraY.Size = new Size(100, 20);
-            textBoxCameraY.ReadOnly = true;
-
-            // Поле для ввода разрешения рендеринга (chunks)
-            Label labelRes = new Label() { Text = "Chunks:", Location = new Point(420, 80), Size = new Size(50, 20) };
-            textBoxChuncksCountInput = new TextBox() { Text = "100", Location = new Point(470, 80), Size = new Size(50, 20) };
-
-            buttonRebuildWindow = new Button() { Text = "Apply", Location = new Point(420, 110), Size = new Size(100, 30) };
-            buttonRebuildWindow.Click += (s, e) => { ApplyRenderResolution(); };
-
-            labelFPS = new Label() { Text = "FPS: --", Location = new Point(420, 150), Size = new Size(150, 20) };
-
-            // ComboBox для выбора объектов
-            Label labelFigures = new Label() { Text = "Figures:", Location = new Point(420, 190), Size = new Size(50, 20) };
-            comboBoxFigures = new ComboBox() { Location = new Point(470, 190), Size = new Size(150, 20) };
-            comboBoxFigures.DropDownStyle = ComboBoxStyle.DropDownList;
-            comboBoxFigures.SelectedIndexChanged += ComboBoxFigures_SelectedIndexChanged;
-
-            // Кнопка добавления
-            buttonAdd = new Button() { Text = "Add NEW", Location = new Point(420, 220), Size = new Size(100, 30) };
-            buttonAdd.Click += (s, e) => { AddNewObject(); };
-
-            // Кнопка редактирования
-            buttonEdit = new Button() { Text = "Edit", Location = new Point(530, 220), Size = new Size(90, 30) };
-            buttonEdit.Click += (s, e) => { EditActiveObject(); };
-
-            // RichTextBox для вывода свойств
-            Label labelProperties = new Label() { Text = "Properties:", Location = new Point(420, 260), Size = new Size(70, 20) };
-            richTextBoxFigurePropertyOut = new RichTextBox() { Location = new Point(420, 280), Size = new Size(200, 200) };
-            richTextBoxFigurePropertyOut.Font = new Font("Consolas", 9);
-
-            this.Controls.Add(pictureBoxScreen);
-            this.Controls.Add(textBoxCameraX);
-            this.Controls.Add(textBoxCameraY);
-            this.Controls.Add(labelRes);
-            this.Controls.Add(textBoxChuncksCountInput);
-            this.Controls.Add(buttonRebuildWindow);
-            this.Controls.Add(labelFPS);
-            this.Controls.Add(labelFigures);
-            this.Controls.Add(comboBoxFigures);
-            this.Controls.Add(buttonAdd);
-            this.Controls.Add(buttonEdit);
-            this.Controls.Add(labelProperties);
-            this.Controls.Add(richTextBoxFigurePropertyOut);
-        }
-        */
         private void InitializeMouseCapture()
         {
             pictureBoxScreen.MouseDown += PictureBox_MouseDown;
             pictureBoxScreen.MouseUp += PictureBox_MouseUp;
             pictureBoxScreen.MouseMove += PictureBox_MouseMove;
+            pictureBoxScreen.MouseWheel += PictureBox_MouseWheel;
         }
 
         private void PictureBox_MouseDown(object sender, MouseEventArgs e)
@@ -198,7 +125,6 @@ namespace ComputerGraphics_3
                 cameraAngleX += deltaX * 0.01;
                 cameraAngleY += deltaY * 0.01;
 
-                // Ограничиваем угол по вертикали
                 cameraAngleY = Math.Max(-Math.PI / 2.1, Math.Min(Math.PI / 2.1, cameraAngleY));
 
                 lastMouseX = e.X;
@@ -208,16 +134,33 @@ namespace ComputerGraphics_3
                 Render();
             }
         }
+        private void PictureBox_MouseWheel(object sender, MouseEventArgs e)
+        {
+            // Изменяем расстояние камеры в зависимости от направления прокрутки
+            float zoomSpeed = 0.5f;
+            cameraDistance -= e.Delta * zoomSpeed / 120; // e.Delta: +120 (вверх), -120 (вниз)
+
+            // Ограничиваем расстояние, чтобы камера не улетела слишком далеко или не приблизилась слишком близко
+            cameraDistance = Math.Max(3, Math.Min(50, cameraDistance));
+            textBoxCameraDistance.Text = cameraDistance.ToString();
+            UpdateCameraPosition();
+            Render();
+        }
 
         private void UpdateCameraPosition()
         {
-            // Сферические координаты камеры
             float cameraX = (float)(Math.Cos(cameraAngleY) * Math.Cos(cameraAngleX) * cameraDistance);
             float cameraY = (float)(Math.Cos(cameraAngleY) * Math.Sin(cameraAngleX) * cameraDistance);
             float cameraZ = (float)(Math.Sin(cameraAngleY) * cameraDistance) + 5;
+            //float cameraD = float.Parse(textBoxCameraDistance.Text);
 
-            textBoxCameraX.Text = $"X: {cameraX:F2}";
-            textBoxCameraY.Text = $"Y: {cameraY:F2}";
+            textBoxCameraX.Text = $"{cameraX:F2}";
+            textBoxCameraY.Text = $"{cameraY:F2}";
+
+            if (textBoxCameraDistance != null)
+            {
+                textBoxCameraDistance.Text = $"{cameraDistance:F1}";
+            }
         }
 
         private void AddNewObject()
@@ -225,7 +168,6 @@ namespace ComputerGraphics_3
             Random rand = new Random();
             Color randomColor = Color.FromArgb(rand.Next(100, 255), rand.Next(100, 255), rand.Next(100, 255));
 
-            // По умолчанию создаем сферу
             Sphere newSphere = new Sphere(nextObjectId++, $"NewObject{nextObjectId - 1}", new Vector3(0, 0, 0), 1, randomColor);
             sceneObjects.Add(newSphere);
             activeObject = newSphere;
@@ -241,14 +183,12 @@ namespace ComputerGraphics_3
 
             string text = richTextBoxFigurePropertyOut.Text;
 
-            // Парсим имя
             Match nameMatch = Regex.Match(text, @"Name:(\S+)");
             if (nameMatch.Success)
             {
                 activeObject.Name = nameMatch.Groups[1].Value;
             }
 
-            // Парсим размер/радиус
             Match sizeMatch = Regex.Match(text, @"Size[^:]*:\s*([\d.-]+)");
             if (sizeMatch.Success)
             {
@@ -256,7 +196,6 @@ namespace ComputerGraphics_3
                 activeObject.Size = Math.Max(0.1f, newSize);
             }
 
-            // Парсим координаты
             Match xMatch = Regex.Match(text, @"Location\.x:([\d.-]+)");
             Match yMatch = Regex.Match(text, @"Location\.y:([\d.-]+)");
             Match zMatch = Regex.Match(text, @"Location\.z:([\d.-]+)");
@@ -321,17 +260,11 @@ namespace ComputerGraphics_3
             }
 
             string type = activeObject is Cube ? "Cube" : "Sphere";
-            string sizeLabel = activeObject is Cube ? "Size" : "Radius";
 
             richTextBoxFigurePropertyOut.Text =
                 $"Name:{activeObject.Name}\r\n" +
                 $"Type:{type}\r\n" +
-                $"{sizeLabel}\r\n" +
-                $"{{\r\n" +
-                $"    {sizeLabel}.x:{activeObject.Size:F2}\r\n" +
-                $"    {sizeLabel}.y:{activeObject.Size:F2}\r\n" +
-                $"    {sizeLabel}.z:{activeObject.Size:F2}\r\n" +
-                $"}}\r\n" +
+                $"Size:{activeObject.Size:F2}\r\n" +
                 $"Location\r\n" +
                 $"{{\r\n" +
                 $"    Location.x:{activeObject.Position.X:F2}\r\n" +
@@ -342,6 +275,8 @@ namespace ComputerGraphics_3
 
         private void ApplyRenderResolution()
         {
+            float CameraDistance = float.Parse(textBoxCameraDistance.Text);
+
             int newRes;
             if (int.TryParse(textBoxChuncksCountInput.Text, out newRes) && newRes >= 1 && newRes <= screenWidth)
             {
@@ -355,16 +290,39 @@ namespace ComputerGraphics_3
         }
 
         private void Render()
-        {
+        {            
+
             UpdateCameraPosition();
 
             Bitmap bmp = new Bitmap(screenWidth, screenHeight);
 
-            float cameraX = float.Parse(textBoxCameraX.Text.Replace("X: ", ""));
-            float cameraY = float.Parse(textBoxCameraY.Text.Replace("Y: ", ""));
-            float cameraZ = (float)(Math.Sin(cameraAngleY) * cameraDistance) + 5;
 
+
+            float cameraX = float.Parse(textBoxCameraX.Text);
+            float cameraY = float.Parse(textBoxCameraY.Text);
+            float cameraZ = (float)(Math.Sin(cameraAngleY) * cameraDistance) + 5;
             Vector3 cameraPos = new Vector3(cameraX, cameraY, cameraZ);
+
+            Vector3 cameraForward = (new Vector3(0, 0, 0) - cameraPos).Normalize();
+
+            var visibleObjects = new List<SceneObject>();
+            float maxDistance = 50f; 
+            float cosFov = (float)Math.Cos(60 * Math.PI / 180); 
+
+            foreach (var obj in sceneObjects)
+            {
+                Vector3 toObject = obj.Position - cameraPos;
+                float distance = toObject.Length(); 
+
+                if (distance > maxDistance) continue;
+
+                Vector3 directionToObject = toObject.Normalize();
+                float dot = Vector3.Dot(cameraForward, directionToObject);
+
+                if (dot < cosFov) continue;
+
+                visibleObjects.Add(obj);
+            }
 
             int blockSize = Math.Max(1, screenWidth / renderResolution);
 
@@ -384,7 +342,7 @@ namespace ComputerGraphics_3
                     SceneObject hitObject = null;
                     Vector3 hitPoint = new Vector3();
 
-                    foreach (var obj in sceneObjects)
+                    foreach (var obj in visibleObjects)
                     {
                         float t;
                         Vector3 point;
@@ -414,12 +372,11 @@ namespace ComputerGraphics_3
             TimeSpan elapsed = DateTime.Now - lastRenderTime;
             if (elapsed.TotalSeconds >= 1)
             {
-                labelFPS.Text = $"FPS: {frameCount} | Chunks: {renderResolution} | Objs: {sceneObjects.Count}";
+                labelFPS.Text = $"FPS: {frameCount} | Chunks: {renderResolution} | Objs: {sceneObjects.Count} | Visible: {visibleObjects.Count}";
                 frameCount = 0;
                 lastRenderTime = DateTime.Now;
             }
         }
-
         private Ray GetRayFromScreenCoords(int x, int y, Vector3 cameraPos)
         {
             Vector3 target = new Vector3(0, 0, 0);
