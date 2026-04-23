@@ -40,7 +40,7 @@
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.textBoxCameraZ = new System.Windows.Forms.TextBox();
             this.label10 = new System.Windows.Forms.Label();
-            this.textBoxCameraFocus = new System.Windows.Forms.TextBox();
+            this.textBoxCameraAngle = new System.Windows.Forms.TextBox();
             this.label9 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
             this.textBoxCameraDistance = new System.Windows.Forms.TextBox();
@@ -63,6 +63,7 @@
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.label2 = new System.Windows.Forms.Label();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.labelTextureFileName = new System.Windows.Forms.Label();
             this.buttonTextureOpen = new System.Windows.Forms.Button();
             this.TexturePictureBox = new System.Windows.Forms.PictureBox();
             this.openFileDialog_Texture = new System.Windows.Forms.OpenFileDialog();
@@ -188,7 +189,7 @@
             // 
             this.groupBox1.Controls.Add(this.textBoxCameraZ);
             this.groupBox1.Controls.Add(this.label10);
-            this.groupBox1.Controls.Add(this.textBoxCameraFocus);
+            this.groupBox1.Controls.Add(this.textBoxCameraAngle);
             this.groupBox1.Controls.Add(this.label9);
             this.groupBox1.Controls.Add(this.label8);
             this.groupBox1.Controls.Add(this.textBoxCameraDistance);
@@ -220,27 +221,27 @@
             // label10
             // 
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(107, 205);
+            this.label10.Location = new System.Drawing.Point(107, 201);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(20, 13);
             this.label10.TabIndex = 19;
             this.label10.Text = "Z: ";
             // 
-            // textBoxCameraFocus
+            // textBoxCameraAngle
             // 
-            this.textBoxCameraFocus.Location = new System.Drawing.Point(48, 212);
-            this.textBoxCameraFocus.Name = "textBoxCameraFocus";
-            this.textBoxCameraFocus.Size = new System.Drawing.Size(33, 20);
-            this.textBoxCameraFocus.TabIndex = 18;
+            this.textBoxCameraAngle.Location = new System.Drawing.Point(48, 212);
+            this.textBoxCameraAngle.Name = "textBoxCameraAngle";
+            this.textBoxCameraAngle.Size = new System.Drawing.Size(33, 20);
+            this.textBoxCameraAngle.TabIndex = 18;
             // 
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(26, 215);
+            this.label9.Location = new System.Drawing.Point(9, 215);
             this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(16, 13);
+            this.label9.Size = new System.Drawing.Size(37, 13);
             this.label9.TabIndex = 17;
-            this.label9.Text = "F:";
+            this.label9.Text = "Angle:";
             // 
             // label8
             // 
@@ -270,7 +271,7 @@
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(18, 172);
+            this.label7.Location = new System.Drawing.Point(38, 156);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(43, 13);
             this.label7.TabIndex = 13;
@@ -422,6 +423,7 @@
             // 
             // groupBox3
             // 
+            this.groupBox3.Controls.Add(this.labelTextureFileName);
             this.groupBox3.Controls.Add(this.buttonTextureOpen);
             this.groupBox3.Controls.Add(this.TexturePictureBox);
             this.groupBox3.Location = new System.Drawing.Point(727, 258);
@@ -430,6 +432,15 @@
             this.groupBox3.TabIndex = 3;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Texture";
+            // 
+            // labelTextureFileName
+            // 
+            this.labelTextureFileName.AutoSize = true;
+            this.labelTextureFileName.Location = new System.Drawing.Point(90, 181);
+            this.labelTextureFileName.Name = "labelTextureFileName";
+            this.labelTextureFileName.Size = new System.Drawing.Size(37, 13);
+            this.labelTextureFileName.TabIndex = 21;
+            this.labelTextureFileName.Text = "-none-";
             // 
             // buttonTextureOpen
             // 
@@ -593,6 +604,7 @@
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
             this.groupBox3.ResumeLayout(false);
+            this.groupBox3.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.TexturePictureBox)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxScreen)).EndInit();
             this.groupBox4.ResumeLayout(false);
@@ -655,9 +667,10 @@
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.TextBox textBoxCameraDistance;
         private System.Windows.Forms.Label label9;
-        private System.Windows.Forms.TextBox textBoxCameraFocus;
+        private System.Windows.Forms.TextBox textBoxCameraAngle;
         private System.Windows.Forms.TextBox textBoxCameraZ;
         private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.Label labelTextureFileName;
     }
 }
 

@@ -137,8 +137,8 @@ namespace ComputerGraphics_3
                 int deltaY = e.Y - startY;
                 Console = $"DragDelta: {GetButtonName(draggingButton)} ({deltaX:+0;-0;0}, {deltaY:+0;-0;0})";
             }
-            x_coord_out.Text = $"X: {e.X}";
-            y_coord_out.Text = $"Y: {e.Y}";
+            x_coord_out.Text = $"{e.X}";
+            y_coord_out.Text = $"{e.Y}";
         }
 
         private void MouseClick(object sender, MouseEventArgs e)

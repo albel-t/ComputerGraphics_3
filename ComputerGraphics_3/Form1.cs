@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -20,6 +21,7 @@ namespace ComputerGraphics_3
         private double cameraAngleX = 0;
         private double cameraAngleY = 0;
         private double cameraDistance = 15;
+        private float cameraSeenAngle = 60;
         private int screenWidth;
         private int screenHeight;
         private int renderResolution = 100;
@@ -84,9 +86,11 @@ namespace ComputerGraphics_3
             if (openFileDialog_Texture.ShowDialog() == DialogResult.OK)
             {
                 string selectedFilePath = openFileDialog_Texture.FileName;
+                string FileName = Path.GetFileName(selectedFilePath);
+                labelTextureFileName.Text = FileName.Length > 17 ? FileName.Insert(12, "\n") : FileName;
 
-                //MessageBox.Show($"Выбран файл: {selectedFilePath}");
-
+                TexturePictureBox.Image = Image.FromFile(selectedFilePath);
+                TexturePictureBox.SizeMode = PictureBoxSizeMode.Zoom;
             }
         }
         private void InitializeMouseCapture()
@@ -277,10 +281,12 @@ namespace ComputerGraphics_3
         private void ApplyRenderResolution()
         {
             cameraDistance = float.Parse(textBoxCameraDistance.Text);
-
+            cameraSeenAngle = float.Parse(textBoxCameraAngle.Text);
+            
             float cameraX = float.Parse(textBoxCameraX.Text);
             float cameraY = float.Parse(textBoxCameraY.Text);
             float cameraZ = float.Parse(textBoxCameraZ.Text);
+
             float radius = (float)Math.Sqrt(cameraX * cameraX + cameraY * cameraY + cameraZ * cameraZ);
 
             cameraAngleX = (float)Math.Atan2(cameraY, cameraX); 
@@ -381,11 +387,12 @@ namespace ComputerGraphics_3
             TimeSpan elapsed = DateTime.Now - lastRenderTime;
             if (elapsed.TotalSeconds >= 1)
             {
-                labelFPS.Text = $"FPS: {frameCount} | Chunks: {renderResolution} | Objs: {sceneObjects.Count} | Visible: {visibleObjects.Count}";
+                labelFPS.Text = $"FPS: {frameCount} | Obj: {sceneObjects.Count} | Visible: {visibleObjects.Count}";
                 frameCount = 0;
                 lastRenderTime = DateTime.Now;
             }
         }
+
         private Ray GetRayFromScreenCoords(int x, int y, Vector3 cameraPos)
         {
             Vector3 target = new Vector3(0, 0, 0);
@@ -394,7 +401,7 @@ namespace ComputerGraphics_3
             Vector3 realRight = Vector3.Cross(realUp, forward).Normalize();
             Vector3 realUpCorrected = Vector3.Cross(forward, realRight).Normalize();
 
-            float fov = 60 * (float)Math.PI / 180;
+            float fov = cameraSeenAngle * (float)Math.PI / 180;
             float aspect = (float)screenWidth / screenHeight;
 
             float px = (x / (float)screenWidth) * 2 - 1;
@@ -408,6 +415,7 @@ namespace ComputerGraphics_3
 
             return new Ray(cameraPos, rayDir);
         }
+        
     }
     public class InputOutputTextbox : InputOutputStream
     {
