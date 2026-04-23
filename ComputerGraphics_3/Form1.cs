@@ -15,13 +15,12 @@ namespace ComputerGraphics_3
     public partial class Form1 : Form
     {
 
-        private float cameraAngle = 0;
 
 
         private double cameraAngleX = 0;
         private double cameraAngleY = 0;
         private double cameraDistance = 15;
-        private float cameraSeenAngle = 60;
+        private float cameraAngle = 60;
         private int screenWidth;
         private int screenHeight;
         private int renderResolution = 100;
@@ -166,6 +165,10 @@ namespace ComputerGraphics_3
             {
                 textBoxCameraDistance.Text = $"{cameraDistance:F1}";
             }
+            if (textBoxCameraAngle != null)
+            {
+                textBoxCameraAngle.Text = $"{cameraAngle:F1}";
+            }
         }
 
         private void AddNewObject()
@@ -281,7 +284,7 @@ namespace ComputerGraphics_3
         private void ApplyRenderResolution()
         {
             cameraDistance = float.Parse(textBoxCameraDistance.Text);
-            cameraSeenAngle = float.Parse(textBoxCameraAngle.Text);
+            cameraAngle = float.Parse(textBoxCameraAngle.Text);
             
             float cameraX = float.Parse(textBoxCameraX.Text);
             float cameraY = float.Parse(textBoxCameraY.Text);
@@ -401,7 +404,7 @@ namespace ComputerGraphics_3
             Vector3 realRight = Vector3.Cross(realUp, forward).Normalize();
             Vector3 realUpCorrected = Vector3.Cross(forward, realRight).Normalize();
 
-            float fov = cameraSeenAngle * (float)Math.PI / 180;
+            float fov = cameraAngle * (float)Math.PI / 180;
             float aspect = (float)screenWidth / screenHeight;
 
             float px = (x / (float)screenWidth) * 2 - 1;
