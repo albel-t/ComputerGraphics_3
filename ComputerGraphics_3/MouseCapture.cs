@@ -24,6 +24,9 @@ namespace ComputerGraphics_3
         private CheckBox MKMCheckBox;
         private CheckBox LKMCheckBox;
 
+        private Label y_coord_out;
+        private Label x_coord_out;
+
         public bool debug;
 
         private int startX = 0;
@@ -50,13 +53,17 @@ namespace ComputerGraphics_3
             MouseConsole = mouseIO;
         }
 
+        public void ConnectLabel(Label x_coord_out, Label y_coord_out)
+        {
+            this.x_coord_out = x_coord_out;
+            this.y_coord_out = y_coord_out;
+        }
         public void ConnectCheckBox(CheckBox RKMCheckBoxIO, CheckBox MKMCheckBoxIO, CheckBox LKMCheckBoxIO)
         {
             RKMCheckBox = RKMCheckBoxIO;
             MKMCheckBox = MKMCheckBoxIO;
             LKMCheckBox = LKMCheckBoxIO;
         }
-
         public void ConnectEvents(Form Window)
         {
             Window.MouseClick += this.MouseClick;
@@ -130,6 +137,8 @@ namespace ComputerGraphics_3
                 int deltaY = e.Y - startY;
                 Console = $"DragDelta: {GetButtonName(draggingButton)} ({deltaX:+0;-0;0}, {deltaY:+0;-0;0})";
             }
+            x_coord_out.Text = $"X: {e.X}";
+            y_coord_out.Text = $"Y: {e.Y}";
         }
 
         private void MouseClick(object sender, MouseEventArgs e)

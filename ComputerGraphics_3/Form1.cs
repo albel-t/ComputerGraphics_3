@@ -51,7 +51,7 @@ namespace ComputerGraphics_3
             mouseInput.ConnectEvents(this);
             mouseInput.ConnectStream(mouseConsole);
             mouseInput.ConnectCheckBox(RKMCheckBox, MKMCheckBox, LKMCheckBox);
-
+            mouseInput.ConnectLabel(x_coord_out, y_coord_out);
             //InitializeUI();
             InitializeMouseCapture();
             comboBoxFigures.SelectedIndexChanged += ComboBoxFigures_SelectedIndexChanged;
@@ -151,11 +151,12 @@ namespace ComputerGraphics_3
         {
             float cameraX = (float)(Math.Cos(cameraAngleY) * Math.Cos(cameraAngleX) * cameraDistance);
             float cameraY = (float)(Math.Cos(cameraAngleY) * Math.Sin(cameraAngleX) * cameraDistance);
-            float cameraZ = (float)(Math.Sin(cameraAngleY) * cameraDistance) + 5;
+            float cameraZ = (float)(Math.Sin(cameraAngleY) * cameraDistance);
             //float cameraD = float.Parse(textBoxCameraDistance.Text);
 
             textBoxCameraX.Text = $"{cameraX:F2}";
             textBoxCameraY.Text = $"{cameraY:F2}";
+            textBoxCameraZ.Text = $"{cameraZ:F2}";
 
             if (textBoxCameraDistance != null)
             {
@@ -275,7 +276,15 @@ namespace ComputerGraphics_3
 
         private void ApplyRenderResolution()
         {
-            float CameraDistance = float.Parse(textBoxCameraDistance.Text);
+            cameraDistance = float.Parse(textBoxCameraDistance.Text);
+
+            float cameraX = float.Parse(textBoxCameraX.Text);
+            float cameraY = float.Parse(textBoxCameraY.Text);
+            float cameraZ = float.Parse(textBoxCameraZ.Text);
+            float radius = (float)Math.Sqrt(cameraX * cameraX + cameraY * cameraY + cameraZ * cameraZ);
+
+            cameraAngleX = (float)Math.Atan2(cameraY, cameraX); 
+            cameraAngleY = (float)Math.Asin(cameraZ / radius); 
 
             int newRes;
             if (int.TryParse(textBoxChuncksCountInput.Text, out newRes) && newRes >= 1 && newRes <= screenWidth)
@@ -300,7 +309,7 @@ namespace ComputerGraphics_3
 
             float cameraX = float.Parse(textBoxCameraX.Text);
             float cameraY = float.Parse(textBoxCameraY.Text);
-            float cameraZ = (float)(Math.Sin(cameraAngleY) * cameraDistance) + 5;
+            float cameraZ = float.Parse(textBoxCameraZ.Text); ;
             Vector3 cameraPos = new Vector3(cameraX, cameraY, cameraZ);
 
             Vector3 cameraForward = (new Vector3(0, 0, 0) - cameraPos).Normalize();

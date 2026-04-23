@@ -38,6 +38,10 @@
             this.label_Y_coord = new System.Windows.Forms.Label();
             this.label_X_coord = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.textBoxCameraZ = new System.Windows.Forms.TextBox();
+            this.label10 = new System.Windows.Forms.Label();
+            this.textBoxCameraFocus = new System.Windows.Forms.TextBox();
+            this.label9 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
             this.textBoxCameraDistance = new System.Windows.Forms.TextBox();
             this.labelFPS = new System.Windows.Forms.Label();
@@ -75,8 +79,6 @@
             this.pictureBoxAllScreen = new System.Windows.Forms.PictureBox();
             this.pictureBoxVisiblePartAllScreen = new System.Windows.Forms.PictureBox();
             this.pictureBoxVisibleShadow = new System.Windows.Forms.PictureBox();
-            this.label9 = new System.Windows.Forms.Label();
-            this.textBoxCameraFocus = new System.Windows.Forms.TextBox();
             this.MouseGroupBox.SuspendLayout();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxRotateCamera)).BeginInit();
@@ -184,6 +186,8 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.textBoxCameraZ);
+            this.groupBox1.Controls.Add(this.label10);
             this.groupBox1.Controls.Add(this.textBoxCameraFocus);
             this.groupBox1.Controls.Add(this.label9);
             this.groupBox1.Controls.Add(this.label8);
@@ -206,6 +210,38 @@
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Screen";
             // 
+            // textBoxCameraZ
+            // 
+            this.textBoxCameraZ.Location = new System.Drawing.Point(131, 198);
+            this.textBoxCameraZ.Name = "textBoxCameraZ";
+            this.textBoxCameraZ.Size = new System.Drawing.Size(38, 20);
+            this.textBoxCameraZ.TabIndex = 20;
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(107, 205);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(20, 13);
+            this.label10.TabIndex = 19;
+            this.label10.Text = "Z: ";
+            // 
+            // textBoxCameraFocus
+            // 
+            this.textBoxCameraFocus.Location = new System.Drawing.Point(48, 212);
+            this.textBoxCameraFocus.Name = "textBoxCameraFocus";
+            this.textBoxCameraFocus.Size = new System.Drawing.Size(33, 20);
+            this.textBoxCameraFocus.TabIndex = 18;
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(26, 215);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(16, 13);
+            this.label9.TabIndex = 17;
+            this.label9.Text = "F:";
+            // 
             // label8
             // 
             this.label8.AutoSize = true;
@@ -225,7 +261,7 @@
             // labelFPS
             // 
             this.labelFPS.AutoSize = true;
-            this.labelFPS.Location = new System.Drawing.Point(12, 146);
+            this.labelFPS.Location = new System.Drawing.Point(12, 124);
             this.labelFPS.Name = "labelFPS";
             this.labelFPS.Size = new System.Drawing.Size(49, 13);
             this.labelFPS.TabIndex = 14;
@@ -243,7 +279,7 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(107, 211);
+            this.label5.Location = new System.Drawing.Point(107, 175);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(20, 13);
             this.label5.TabIndex = 8;
@@ -252,7 +288,7 @@
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(107, 184);
+            this.label6.Location = new System.Drawing.Point(107, 148);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(20, 13);
             this.label6.TabIndex = 7;
@@ -260,14 +296,14 @@
             // 
             // textBoxCameraY
             // 
-            this.textBoxCameraY.Location = new System.Drawing.Point(131, 208);
+            this.textBoxCameraY.Location = new System.Drawing.Point(131, 172);
             this.textBoxCameraY.Name = "textBoxCameraY";
             this.textBoxCameraY.Size = new System.Drawing.Size(38, 20);
             this.textBoxCameraY.TabIndex = 12;
             // 
             // textBoxCameraX
             // 
-            this.textBoxCameraX.Location = new System.Drawing.Point(131, 181);
+            this.textBoxCameraX.Location = new System.Drawing.Point(131, 145);
             this.textBoxCameraX.Name = "textBoxCameraX";
             this.textBoxCameraX.Size = new System.Drawing.Size(38, 20);
             this.textBoxCameraX.TabIndex = 11;
@@ -532,22 +568,6 @@
             this.pictureBoxVisibleShadow.TabIndex = 8;
             this.pictureBoxVisibleShadow.TabStop = false;
             // 
-            // label9
-            // 
-            this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(26, 215);
-            this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(16, 13);
-            this.label9.TabIndex = 17;
-            this.label9.Text = "F:";
-            // 
-            // textBoxCameraFocus
-            // 
-            this.textBoxCameraFocus.Location = new System.Drawing.Point(48, 212);
-            this.textBoxCameraFocus.Name = "textBoxCameraFocus";
-            this.textBoxCameraFocus.Size = new System.Drawing.Size(33, 20);
-            this.textBoxCameraFocus.TabIndex = 18;
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -636,6 +656,8 @@
         private System.Windows.Forms.TextBox textBoxCameraDistance;
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.TextBox textBoxCameraFocus;
+        private System.Windows.Forms.TextBox textBoxCameraZ;
+        private System.Windows.Forms.Label label10;
     }
 }
 
