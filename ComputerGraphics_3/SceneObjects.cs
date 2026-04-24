@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace ComputerGraphics_3
@@ -13,15 +14,15 @@ namespace ComputerGraphics_3
         public string Name { get; set; }
         public Vector3 Position { get; set; }
         public float Size { get; set; }
-        public Color Color { get; set; }
+        public Color[] Colors { get; set; }
 
-        public SceneObject(int id, string name, Vector3 position, float size, Color color)
+        public SceneObject(int id, string name, Vector3 position, float size, Color[] colors)
         {
             Id = id;
             Name = name;
             Position = position;
             Size = size;
-            Color = color;
+            Colors = colors;
         }
 
         public abstract bool Intersect(Ray ray, out float t, out Vector3 hitPoint);
@@ -31,12 +32,63 @@ namespace ComputerGraphics_3
         {
             return $"{Id}: {Name} ({Position.X:F1}, {Position.Y:F1}, {Position.Z:F1}) Size={Size:F1}";
         }
+        public Color StrToColor(string color)
+        {
+
+
+            color = Regex.Replace(color, @"Color\.\S\:", "");
+
+            switch (color)
+            {
+                case "Red":
+                    return Color.Red;
+                case "White":
+                    return Color.White;
+                case "Gray":
+                    return Color.Gray;
+                case "Green":
+                    return Color.Green;
+                case "Blue":
+                    return Color.Blue;
+                case "Black":
+                    return Color.Black;
+                case "Yellow":
+                    return Color.Yellow;
+                case "Pink":
+                    return Color.Pink;
+                default:
+                    return Color.LightGray;
+            }
+        }
+        public string ColorToStr(Color color)
+        {
+            if (color == Color.Red)
+                return "Red";
+            if (color == Color.White)
+                return "White";
+            if (color == Color.Gray)
+                return "Gray";
+            if (color == Color.Green)
+                return "Green";
+            if (color == Color.Blue)
+                return "Blue";
+            if (color == Color.Black)
+                return "Black";
+            if (color == Color.Yellow)
+                return "Yellow";
+            if (color == Color.Pink)
+                return "Pink";
+            return "LightGray";
+        }
     }
 
     public class Cube : SceneObject
     {
-        public Cube(int id, string name, Vector3 position, float size, Color color)
-            : base(id, name, position, size, color) { }
+        
+        public Cube(int id, string name, Vector3 position, float size, Color[] colors)
+            : base(id, name, position, size, colors) { 
+        
+        }
 
         public override bool Intersect(Ray ray, out float t, out Vector3 hitPoint)
         {
@@ -90,11 +142,11 @@ namespace ComputerGraphics_3
             float cubeMaxZ = Position.Z + Size;
 
             if (Math.Abs(hitPoint.X - cubeMinX) < eps || Math.Abs(hitPoint.X - cubeMaxX) < eps)
-                return ColorIs ? Color.Red : Color.Gray;
+                return ColorIs ? Colors[0] : Color.Gray;
             if (Math.Abs(hitPoint.Y - cubeMinY) < eps || Math.Abs(hitPoint.Y - cubeMaxY) < eps)
-                return ColorIs ? Color.Green : Color.Gray;
+                return ColorIs ? Colors[1] : Color.Gray;
             if (Math.Abs(hitPoint.Z - cubeMinZ) < eps || Math.Abs(hitPoint.Z - cubeMaxZ) < eps)
-                return ColorIs ? Color.Blue : Color.Gray; 
+                return ColorIs ? Colors[2] : Color.Gray; 
 
             return Color.White;
         }
@@ -102,8 +154,8 @@ namespace ComputerGraphics_3
 
     public class Sphere : SceneObject
     {
-        public Sphere(int id, string name, Vector3 position, float radius, Color color)
-            : base(id, name, position, radius, color) { }
+        public Sphere(int id, string name, Vector3 position, float radius, Color[] colors)
+            : base(id, name, position, radius, colors) { }
 
         public override bool Intersect(Ray ray, out float t, out Vector3 hitPoint)
         {
@@ -141,9 +193,9 @@ namespace ComputerGraphics_3
             shade = Math.Max(0.2f, Math.Min(1.0f, shade));
 
             return Color.FromArgb(
-                (int)(Color.R * shade),
-                (int)(Color.G * shade),
-                (int)(Color.B * shade)
+                (int)(Colors[0].R * shade),
+                (int)(Colors[0].G * shade),
+                (int)(Colors[0].B * shade)
             );
         }
     }

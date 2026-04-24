@@ -61,8 +61,8 @@ namespace ComputerGraphics_3
             buttonAdd.Click += (s, e) => { AddNewObject(); };
 
 
-            sceneObjects.Add(new Cube(1, "Cube1", new Vector3(-2, -2, -2), 2, Color.Red));
-            sceneObjects.Add(new Sphere(2, "Sphere1", new Vector3(2, 2, 2), 1.5f, Color.Blue));
+            sceneObjects.Add(new Cube(1, "Cube1", new Vector3(-2, -2, -2), 2, new Color[] { Color.Red, Color.Green, Color.Blue }));
+            sceneObjects.Add(new Sphere(2, "Sphere1", new Vector3(2, 2, 2), 1.5f, new Color[] { Color.Blue}));
             nextObjectId = 3;
 
             UpdateObjectsList();
@@ -176,7 +176,7 @@ namespace ComputerGraphics_3
             Random rand = new Random();
             Color randomColor = Color.FromArgb(rand.Next(100, 255), rand.Next(100, 255), rand.Next(100, 255));
 
-            Sphere newSphere = new Sphere(nextObjectId++, $"NewObject{nextObjectId - 1}", new Vector3(0, 0, 0), 1, randomColor);
+            Sphere newSphere = new Sphere(nextObjectId++, $"NewObject{nextObjectId - 1}", new Vector3(0, 0, 0), 1, new Color[] { randomColor });
             sceneObjects.Add(newSphere);
             activeObject = newSphere;
 
@@ -214,6 +214,19 @@ namespace ComputerGraphics_3
                 float newY = float.Parse(yMatch.Groups[1].Value, System.Globalization.CultureInfo.InvariantCulture);
                 float newZ = float.Parse(zMatch.Groups[1].Value, System.Globalization.CultureInfo.InvariantCulture);
                 activeObject.Position = new Vector3(newX, newY, newZ);
+            }
+            Match aColor = Regex.Match(text, @"Color\.A:(\S+)");
+            Match bColor = Regex.Match(text, @"Color\.B:(\S+)");
+            Match cColor = Regex.Match(text, @"Color\.C:(\S+)");
+            if (aColor.Success && bColor.Success && cColor.Success)
+            {
+                activeObject.Colors = new Color[] { activeObject.StrToColor(aColor.ToString()), 
+                    activeObject.StrToColor(bColor.ToString()) ,
+                    activeObject.StrToColor(cColor.ToString()) };
+            }
+            else if (aColor.Success && activeObject is Sphere)
+            {
+                activeObject.Colors = new Color[] { activeObject.StrToColor(aColor.ToString())};
             }
 
             UpdateObjectsList();
@@ -278,7 +291,14 @@ namespace ComputerGraphics_3
                 $"    Location.x:{activeObject.Position.X:F2}\r\n" +
                 $"    Location.y:{activeObject.Position.Y:F2}\r\n" +
                 $"    Location.z:{activeObject.Position.Z:F2}\r\n" +
-                $"}}";
+                $"}}\r\n" +
+                $"Colors\r\n" +
+                $"{{\r\n" +
+                $"    Color.A:{activeObject.ColorToStr(activeObject.Colors[0])}\r\n" +
+                (activeObject.Colors.Length > 1?
+                $"    Color.B:{activeObject.ColorToStr(activeObject.Colors[1])}\r\n" +
+                $"    Color.C:{activeObject.ColorToStr(activeObject.Colors[2])}\r\n" : "" )+
+                $"}}\r\n.";
         }
 
         private void ApplyRenderResolution()
