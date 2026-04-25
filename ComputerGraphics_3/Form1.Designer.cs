@@ -78,7 +78,7 @@
             this.buttonSave = new System.Windows.Forms.Button();
             this.richTextBoxLogsOut = new System.Windows.Forms.RichTextBox();
             this.pictureBoxAllScreen = new System.Windows.Forms.PictureBox();
-            this.pictureBoxVisiblePartAllScreen = new System.Windows.Forms.PictureBox();
+            this.pictureBoxContur = new System.Windows.Forms.PictureBox();
             this.pictureBoxVisibleShadow = new System.Windows.Forms.PictureBox();
             this.MouseGroupBox.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -90,7 +90,7 @@
             this.groupBox4.SuspendLayout();
             this.groupBox5.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxAllScreen)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxVisiblePartAllScreen)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxContur)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxVisibleShadow)).BeginInit();
             this.SuspendLayout();
             // 
@@ -382,9 +382,12 @@
             // 
             this.comboBoxTypeOfObject.FormattingEnabled = true;
             this.comboBoxTypeOfObject.Items.AddRange(new object[] {
-            "-NONE-"});
+            "Sphere",
+            "Cube",
+            "Pyramid"});
             this.comboBoxTypeOfObject.Location = new System.Drawing.Point(46, 21);
             this.comboBoxTypeOfObject.Name = "comboBoxTypeOfObject";
+            this.comboBoxTypeOfObject.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.comboBoxTypeOfObject.Size = new System.Drawing.Size(121, 21);
             this.comboBoxTypeOfObject.TabIndex = 1;
             // 
@@ -563,13 +566,13 @@
             this.pictureBoxAllScreen.TabIndex = 2;
             this.pictureBoxAllScreen.TabStop = false;
             // 
-            // pictureBoxVisiblePartAllScreen
+            // pictureBoxContur
             // 
-            this.pictureBoxVisiblePartAllScreen.Location = new System.Drawing.Point(537, 226);
-            this.pictureBoxVisiblePartAllScreen.Name = "pictureBoxVisiblePartAllScreen";
-            this.pictureBoxVisiblePartAllScreen.Size = new System.Drawing.Size(168, 151);
-            this.pictureBoxVisiblePartAllScreen.TabIndex = 7;
-            this.pictureBoxVisiblePartAllScreen.TabStop = false;
+            this.pictureBoxContur.Location = new System.Drawing.Point(537, 226);
+            this.pictureBoxContur.Name = "pictureBoxContur";
+            this.pictureBoxContur.Size = new System.Drawing.Size(168, 151);
+            this.pictureBoxContur.TabIndex = 7;
+            this.pictureBoxContur.TabStop = false;
             // 
             // pictureBoxVisibleShadow
             // 
@@ -585,7 +588,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1403, 582);
             this.Controls.Add(this.pictureBoxVisibleShadow);
-            this.Controls.Add(this.pictureBoxVisiblePartAllScreen);
+            this.Controls.Add(this.pictureBoxContur);
             this.Controls.Add(this.pictureBoxAllScreen);
             this.Controls.Add(this.groupBox5);
             this.Controls.Add(this.groupBox4);
@@ -611,7 +614,7 @@
             this.groupBox4.PerformLayout();
             this.groupBox5.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxAllScreen)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxVisiblePartAllScreen)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxContur)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxVisibleShadow)).EndInit();
             this.ResumeLayout(false);
 
@@ -661,7 +664,7 @@
         private System.Windows.Forms.RichTextBox richTextBoxLogsOut;
         private System.Windows.Forms.Button buttonLoad;
         private System.Windows.Forms.PictureBox pictureBoxAllScreen;
-        private System.Windows.Forms.PictureBox pictureBoxVisiblePartAllScreen;
+        private System.Windows.Forms.PictureBox pictureBoxContur;
         private System.Windows.Forms.PictureBox pictureBoxVisibleShadow;
         private System.Windows.Forms.Label labelFPS;
         private System.Windows.Forms.Label label8;

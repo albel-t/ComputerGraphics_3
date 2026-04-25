@@ -173,13 +173,25 @@ namespace ComputerGraphics_3
 
         private void AddNewObject()
         {
-            Random rand = new Random();
-            Color randomColor = Color.FromArgb(rand.Next(100, 255), rand.Next(100, 255), rand.Next(100, 255));
-
-            Sphere newSphere = new Sphere(nextObjectId++, $"NewObject{nextObjectId - 1}", new Vector3(0, 0, 0), 1, new Color[] { randomColor });
-            sceneObjects.Add(newSphere);
-            activeObject = newSphere;
-
+            Color randomColor = Color.Gray;
+            if ((comboBoxTypeOfObject.SelectedItem == null )||( comboBoxTypeOfObject.SelectedItem.ToString() == "Sphere"))
+            {
+                Sphere newSphere = new Sphere(nextObjectId++, $"NewObject{nextObjectId - 1}", new Vector3(0, 0, 0), 1, new Color[] { randomColor });
+                sceneObjects.Add(newSphere);
+                activeObject = newSphere;
+            }
+            else if (comboBoxTypeOfObject.SelectedItem.ToString() == "Cube")
+            {
+                Cube newCube = new Cube(nextObjectId++, $"NewObject{nextObjectId - 1}", new Vector3(0, 0, 0), 1, new Color[] { randomColor, randomColor, randomColor });
+                sceneObjects.Add(newCube);
+                activeObject = newCube;
+            }
+            else if (comboBoxTypeOfObject.SelectedItem.ToString() == "Pyramid")
+            {
+                Pyramid newPyramid = new Pyramid(nextObjectId++, $"NewObject{nextObjectId - 1}", new Vector3(0, 0, 0), 1, new Color[] { randomColor, randomColor, randomColor, randomColor });
+                sceneObjects.Add(newPyramid);
+                activeObject = newPyramid;
+            }
             UpdateObjectsList();
             UpdateActiveObjectDisplay();
             Render();
@@ -218,7 +230,15 @@ namespace ComputerGraphics_3
             Match aColor = Regex.Match(text, @"Color\.A:(\S+)");
             Match bColor = Regex.Match(text, @"Color\.B:(\S+)");
             Match cColor = Regex.Match(text, @"Color\.C:(\S+)");
-            if (aColor.Success && bColor.Success && cColor.Success)
+            Match dColor = Regex.Match(text, @"Color\.D:(\S+)");
+            if (aColor.Success && bColor.Success && cColor.Success && dColor.Success)
+            {
+                activeObject.Colors = new Color[] { activeObject.StrToColor(aColor.ToString()),
+                    activeObject.StrToColor(bColor.ToString()) ,
+                    activeObject.StrToColor(cColor.ToString()) ,
+                    activeObject.StrToColor(cColor.ToString()) };
+            }
+            else if (aColor.Success && bColor.Success && cColor.Success)
             {
                 activeObject.Colors = new Color[] { activeObject.StrToColor(aColor.ToString()), 
                     activeObject.StrToColor(bColor.ToString()) ,
@@ -280,7 +300,15 @@ namespace ComputerGraphics_3
                 return;
             }
 
-            string type = activeObject is Cube ? "Cube" : "Sphere";
+            string type;
+            if (activeObject is Cube)
+                type = "Cube";
+            else if(activeObject is Sphere)
+                type = "Sphere";
+            else if (activeObject is Pyramid)
+                type = "Pyramid";
+            else
+                type = "figure?";
 
             richTextBoxFigurePropertyOut.Text =
                 $"Name:{activeObject.Name}\r\n" +
@@ -297,7 +325,9 @@ namespace ComputerGraphics_3
                 $"    Color.A:{activeObject.ColorToStr(activeObject.Colors[0])}\r\n" +
                 (activeObject.Colors.Length > 1?
                 $"    Color.B:{activeObject.ColorToStr(activeObject.Colors[1])}\r\n" +
-                $"    Color.C:{activeObject.ColorToStr(activeObject.Colors[2])}\r\n" : "" )+
+                $"    Color.C:{activeObject.ColorToStr(activeObject.Colors[2])}\r\n" : "") +
+                (activeObject.Colors.Length > 3 ?
+                $"    Color.D:{activeObject.ColorToStr(activeObject.Colors[3])}\r\n" : "" ) +
                 $"}}\r\n.";
         }
 
@@ -328,8 +358,7 @@ namespace ComputerGraphics_3
         }
 
         private void Render()
-        {            
-
+        {
             UpdateCameraPosition();
 
             Bitmap bmp = new Bitmap(screenWidth, screenHeight);
@@ -413,6 +442,151 @@ namespace ComputerGraphics_3
                 labelFPS.Text = $"FPS: {frameCount} | Obj: {sceneObjects.Count} | Visible: {visibleObjects.Count}";
                 frameCount = 0;
                 lastRenderTime = DateTime.Now;
+            }
+            RenderContours();
+
+        }
+        private void RenderContours()
+        {
+            if (pictureBoxContur.Width == 0 || pictureBoxContur.Height == 0) return;
+
+            int contourWidth = pictureBoxContur.Width;
+            int contourHeight = pictureBoxContur.Height;
+
+            Bitmap contourBmp = new Bitmap(contourWidth, contourHeight);
+            using (Graphics g = Graphics.FromImage(contourBmp))
+            {
+                g.Clear(Color.Black);
+                using (Pen whitePen = new Pen(Color.White, 2))
+                {
+                    Vector3 cameraPos = new Vector3(
+                        float.Parse(textBoxCameraX.Text),
+                        float.Parse(textBoxCameraY.Text),
+                        float.Parse(textBoxCameraZ.Text)
+                    );
+
+                    // Используем тот же угол обзора, что и для рендера
+                    float currentCameraAngle = float.Parse(textBoxCameraAngle.Text);
+
+                    foreach (var obj in sceneObjects)
+                    {
+                        // Проецируем с учетом размера и угла обзора контурного picturebox
+                        var projectedVertices = obj.GetProjectedVertices(
+                            cameraPos,
+                            currentCameraAngle,  // используем текущий угол обзора
+                            contourWidth,
+                            contourHeight
+                        );
+
+                        if (projectedVertices.Count == 0) continue;
+
+                        if (obj is Cube)
+                        {
+                            DrawCubeContour(g, whitePen, projectedVertices);
+                        }
+                        else if (obj is Pyramid)
+                        {
+                            DrawPyramidContour(g, whitePen, projectedVertices);
+                        }
+                        else if (obj is Sphere)
+                        {
+                            DrawSphereContour(g, whitePen, projectedVertices);
+                        }
+                    }
+                }
+            }
+            pictureBoxContur.Image = contourBmp;
+        }
+        private void DrawCubeContour(Graphics g, Pen pen, List<Vector2> vertices)
+        {
+            if (vertices.Count < 8) return;
+
+            // Проверяем, что все координаты в пределах видимой области
+            for (int i = 0; i < vertices.Count; i++)
+            {
+                // Ограничиваем координаты, чтобы не рисовать за пределами
+                vertices[i] = new Vector2(
+                    Math.Max(0, Math.Min(pictureBoxContur.Width - 1, vertices[i].X)),
+                    Math.Max(0, Math.Min(pictureBoxContur.Height - 1, vertices[i].Y))
+                );
+            }
+
+            // Передняя грань
+            g.DrawLine(pen, vertices[0].X, vertices[0].Y, vertices[1].X, vertices[1].Y);
+            g.DrawLine(pen, vertices[1].X, vertices[1].Y, vertices[2].X, vertices[2].Y);
+            g.DrawLine(pen, vertices[2].X, vertices[2].Y, vertices[3].X, vertices[3].Y);
+            g.DrawLine(pen, vertices[3].X, vertices[3].Y, vertices[0].X, vertices[0].Y);
+
+            // Задняя грань
+            g.DrawLine(pen, vertices[4].X, vertices[4].Y, vertices[5].X, vertices[5].Y);
+            g.DrawLine(pen, vertices[5].X, vertices[5].Y, vertices[6].X, vertices[6].Y);
+            g.DrawLine(pen, vertices[6].X, vertices[6].Y, vertices[7].X, vertices[7].Y);
+            g.DrawLine(pen, vertices[7].X, vertices[7].Y, vertices[4].X, vertices[4].Y);
+
+            // Соединительные рёбра
+            g.DrawLine(pen, vertices[0].X, vertices[0].Y, vertices[4].X, vertices[4].Y);
+            g.DrawLine(pen, vertices[1].X, vertices[1].Y, vertices[5].X, vertices[5].Y);
+            g.DrawLine(pen, vertices[2].X, vertices[2].Y, vertices[6].X, vertices[6].Y);
+            g.DrawLine(pen, vertices[3].X, vertices[3].Y, vertices[7].X, vertices[7].Y);
+        }
+
+        private void DrawPyramidContour(Graphics g, Pen pen, List<Vector2> vertices)
+        {
+            if (vertices.Count < 5) return;
+
+            // Ограничиваем координаты
+            for (int i = 0; i < vertices.Count; i++)
+            {
+                vertices[i] = new Vector2(
+                    Math.Max(0, Math.Min(pictureBoxContur.Width - 1, vertices[i].X)),
+                    Math.Max(0, Math.Min(pictureBoxContur.Height - 1, vertices[i].Y))
+                );
+            }
+
+            // Основание
+            g.DrawLine(pen, vertices[0].X, vertices[0].Y, vertices[1].X, vertices[1].Y);
+            g.DrawLine(pen, vertices[1].X, vertices[1].Y, vertices[2].X, vertices[2].Y);
+            g.DrawLine(pen, vertices[2].X, vertices[2].Y, vertices[3].X, vertices[3].Y);
+            g.DrawLine(pen, vertices[3].X, vertices[3].Y, vertices[0].X, vertices[0].Y);
+
+            // Ребра к вершине
+            g.DrawLine(pen, vertices[0].X, vertices[0].Y, vertices[4].X, vertices[4].Y);
+            g.DrawLine(pen, vertices[1].X, vertices[1].Y, vertices[4].X, vertices[4].Y);
+            g.DrawLine(pen, vertices[2].X, vertices[2].Y, vertices[4].X, vertices[4].Y);
+            g.DrawLine(pen, vertices[3].X, vertices[3].Y, vertices[4].X, vertices[4].Y);
+        }
+
+        private void DrawSphereContour(Graphics g, Pen pen, List<Vector2> vertices)
+        {
+            if (vertices.Count == 0) return;
+
+            // Ограничиваем координаты
+            for (int i = 0; i < vertices.Count; i++)
+            {
+                vertices[i] = new Vector2(
+                    Math.Max(0, Math.Min(pictureBoxContur.Width - 1, vertices[i].X)),
+                    Math.Max(0, Math.Min(pictureBoxContur.Height - 1, vertices[i].Y))
+                );
+            }
+
+            float minX = vertices[0].X, maxX = vertices[0].X;
+            float minY = vertices[0].Y, maxY = vertices[0].Y;
+
+            foreach (var v in vertices)
+            {
+                minX = Math.Min(minX, v.X);
+                maxX = Math.Max(maxX, v.X);
+                minY = Math.Min(minY, v.Y);
+                maxY = Math.Max(maxY, v.Y);
+            }
+
+            float centerX = (minX + maxX) / 2;
+            float centerY = (minY + maxY) / 2;
+            float radius = Math.Max((maxX - minX) / 2, (maxY - minY) / 2);
+
+            if (radius > 0)
+            {
+                g.DrawEllipse(pen, centerX - radius, centerY - radius, radius * 2, radius * 2);
             }
         }
 
