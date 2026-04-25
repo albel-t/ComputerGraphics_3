@@ -457,7 +457,7 @@ namespace ComputerGraphics_3
             using (Graphics g = Graphics.FromImage(contourBmp))
             {
                 g.Clear(Color.White);
-                using (Pen whitePen = new Pen(Color.Black, 2))
+                using (Pen blackPen = new Pen(Color.Black, 2))
                 {
                     Vector3 cameraPos = new Vector3(
                         float.Parse(textBoxCameraX.Text),
@@ -465,15 +465,13 @@ namespace ComputerGraphics_3
                         float.Parse(textBoxCameraZ.Text)
                     );
 
-                    // Используем тот же угол обзора, что и для рендера
                     float currentCameraAngle = float.Parse(textBoxCameraAngle.Text);
 
                     foreach (var obj in sceneObjects)
                     {
-                        // Проецируем с учетом размера и угла обзора контурного picturebox
                         var projectedVertices = obj.GetProjectedVertices(
                             cameraPos,
-                            currentCameraAngle,  // используем текущий угол обзора
+                            currentCameraAngle,
                             contourWidth,
                             contourHeight
                         );
@@ -482,15 +480,15 @@ namespace ComputerGraphics_3
 
                         if (obj is Cube)
                         {
-                            DrawCubeContour(g, whitePen, projectedVertices);
+                            DrawCubeContour(g, blackPen, projectedVertices);
                         }
                         else if (obj is Pyramid)
                         {
-                            DrawPyramidContour(g, whitePen, projectedVertices);
+                            DrawPyramidContour(g, blackPen, projectedVertices);
                         }
                         else if (obj is Sphere)
                         {
-                            DrawSphereContour(g, whitePen, projectedVertices);
+                            DrawSphereContour(g, blackPen, projectedVertices);
                         }
                     }
                 }
@@ -501,93 +499,191 @@ namespace ComputerGraphics_3
         {
             if (vertices.Count < 8) return;
 
-            // Проверяем, что все координаты в пределах видимой области
-            for (int i = 0; i < vertices.Count; i++)
-            {
-                // Ограничиваем координаты, чтобы не рисовать за пределами
-                vertices[i] = new Vector2(
-                    Math.Max(0, Math.Min(pictureBoxContur.Width - 1, vertices[i].X)),
-                    Math.Max(0, Math.Min(pictureBoxContur.Height - 1, vertices[i].Y))
-                );
-            }
-
+            // Рисуем линии, проверяя видимость каждой вершины
             // Передняя грань
-            g.DrawLine(pen, vertices[0].X, vertices[0].Y, vertices[1].X, vertices[1].Y);
-            g.DrawLine(pen, vertices[1].X, vertices[1].Y, vertices[2].X, vertices[2].Y);
-            g.DrawLine(pen, vertices[2].X, vertices[2].Y, vertices[3].X, vertices[3].Y);
-            g.DrawLine(pen, vertices[3].X, vertices[3].Y, vertices[0].X, vertices[0].Y);
+            DrawLineClipped(g, pen, vertices[0], vertices[1]);
+            DrawLineClipped(g, pen, vertices[1], vertices[2]);
+            DrawLineClipped(g, pen, vertices[2], vertices[3]);
+            DrawLineClipped(g, pen, vertices[3], vertices[0]);
 
             // Задняя грань
-            g.DrawLine(pen, vertices[4].X, vertices[4].Y, vertices[5].X, vertices[5].Y);
-            g.DrawLine(pen, vertices[5].X, vertices[5].Y, vertices[6].X, vertices[6].Y);
-            g.DrawLine(pen, vertices[6].X, vertices[6].Y, vertices[7].X, vertices[7].Y);
-            g.DrawLine(pen, vertices[7].X, vertices[7].Y, vertices[4].X, vertices[4].Y);
+            DrawLineClipped(g, pen, vertices[4], vertices[5]);
+            DrawLineClipped(g, pen, vertices[5], vertices[6]);
+            DrawLineClipped(g, pen, vertices[6], vertices[7]);
+            DrawLineClipped(g, pen, vertices[7], vertices[4]);
 
             // Соединительные рёбра
-            g.DrawLine(pen, vertices[0].X, vertices[0].Y, vertices[4].X, vertices[4].Y);
-            g.DrawLine(pen, vertices[1].X, vertices[1].Y, vertices[5].X, vertices[5].Y);
-            g.DrawLine(pen, vertices[2].X, vertices[2].Y, vertices[6].X, vertices[6].Y);
-            g.DrawLine(pen, vertices[3].X, vertices[3].Y, vertices[7].X, vertices[7].Y);
+            DrawLineClipped(g, pen, vertices[0], vertices[4]);
+            DrawLineClipped(g, pen, vertices[1], vertices[5]);
+            DrawLineClipped(g, pen, vertices[2], vertices[6]);
+            DrawLineClipped(g, pen, vertices[3], vertices[7]);
         }
 
         private void DrawPyramidContour(Graphics g, Pen pen, List<Vector2> vertices)
         {
             if (vertices.Count < 5) return;
 
-            // Ограничиваем координаты
-            for (int i = 0; i < vertices.Count; i++)
-            {
-                vertices[i] = new Vector2(
-                    Math.Max(0, Math.Min(pictureBoxContur.Width - 1, vertices[i].X)),
-                    Math.Max(0, Math.Min(pictureBoxContur.Height - 1, vertices[i].Y))
-                );
-            }
-
             // Основание
-            g.DrawLine(pen, vertices[0].X, vertices[0].Y, vertices[1].X, vertices[1].Y);
-            g.DrawLine(pen, vertices[1].X, vertices[1].Y, vertices[2].X, vertices[2].Y);
-            g.DrawLine(pen, vertices[2].X, vertices[2].Y, vertices[3].X, vertices[3].Y);
-            g.DrawLine(pen, vertices[3].X, vertices[3].Y, vertices[0].X, vertices[0].Y);
+            DrawLineClipped(g, pen, vertices[0], vertices[1]);
+            DrawLineClipped(g, pen, vertices[1], vertices[2]);
+            DrawLineClipped(g, pen, vertices[2], vertices[3]);
+            DrawLineClipped(g, pen, vertices[3], vertices[0]);
 
             // Ребра к вершине
-            g.DrawLine(pen, vertices[0].X, vertices[0].Y, vertices[4].X, vertices[4].Y);
-            g.DrawLine(pen, vertices[1].X, vertices[1].Y, vertices[4].X, vertices[4].Y);
-            g.DrawLine(pen, vertices[2].X, vertices[2].Y, vertices[4].X, vertices[4].Y);
-            g.DrawLine(pen, vertices[3].X, vertices[3].Y, vertices[4].X, vertices[4].Y);
+            DrawLineClipped(g, pen, vertices[0], vertices[4]);
+            DrawLineClipped(g, pen, vertices[1], vertices[4]);
+            DrawLineClipped(g, pen, vertices[2], vertices[4]);
+            DrawLineClipped(g, pen, vertices[3], vertices[4]);
         }
 
         private void DrawSphereContour(Graphics g, Pen pen, List<Vector2> vertices)
         {
             if (vertices.Count == 0) return;
 
-            // Ограничиваем координаты
-            for (int i = 0; i < vertices.Count; i++)
-            {
-                vertices[i] = new Vector2(
-                    Math.Max(0, Math.Min(pictureBoxContur.Width - 1, vertices[i].X)),
-                    Math.Max(0, Math.Min(pictureBoxContur.Height - 1, vertices[i].Y))
-                );
-            }
-
-            float minX = vertices[0].X, maxX = vertices[0].X;
-            float minY = vertices[0].Y, maxY = vertices[0].Y;
+            // Находим bounding box только из видимых вершин
+            bool hasValidVertex = false;
+            float minX = float.MaxValue, maxX = float.MinValue;
+            float minY = float.MaxValue, maxY = float.MinValue;
 
             foreach (var v in vertices)
             {
-                minX = Math.Min(minX, v.X);
-                maxX = Math.Max(maxX, v.X);
-                minY = Math.Min(minY, v.Y);
-                maxY = Math.Max(maxY, v.Y);
+                // Проверяем, что вершина в пределах видимой области с небольшим запасом
+                if (v.X >= -100 && v.X <= pictureBoxContur.Width + 100 &&
+                    v.Y >= -100 && v.Y <= pictureBoxContur.Height + 100)
+                {
+                    hasValidVertex = true;
+                    minX = Math.Min(minX, v.X);
+                    maxX = Math.Max(maxX, v.X);
+                    minY = Math.Min(minY, v.Y);
+                    maxY = Math.Max(maxY, v.Y);
+                }
             }
+
+            if (!hasValidVertex) return;
 
             float centerX = (minX + maxX) / 2;
             float centerY = (minY + maxY) / 2;
             float radius = Math.Max((maxX - minX) / 2, (maxY - minY) / 2);
 
-            if (radius > 0)
+            // Рисуем окружность только если центр в пределах экрана с запасом
+            if (radius > 0 && centerX > -radius * 2 && centerX < pictureBoxContur.Width + radius * 2 &&
+                centerY > -radius * 2 && centerY < pictureBoxContur.Height + radius * 2)
             {
+                // Ограничиваем отрисовку, но не изменяем координаты
                 g.DrawEllipse(pen, centerX - radius, centerY - radius, radius * 2, radius * 2);
             }
+        }
+
+        // Добавьте этот вспомогательный метод для обрезки линий
+        private void DrawLineClipped(Graphics g, Pen pen, Vector2 p1, Vector2 p2)
+        {
+            int width = pictureBoxContur.Width;
+            int height = pictureBoxContur.Height;
+
+            // Проверяем, видна ли хотя бы одна вершина
+            bool p1Visible = IsPointVisible(p1, width, height);
+            bool p2Visible = IsPointVisible(p2, width, height);
+
+            // Если обе вершины невидимы, проверяем, пересекает ли линия видимую область
+            if (!p1Visible && !p2Visible)
+            {
+                // Простая проверка: если линия далеко за пределами, не рисуем
+                if ((p1.X < -width && p2.X < -width) || (p1.X > width * 2 && p2.X > width * 2) ||
+                    (p1.Y < -height && p2.Y < -height) || (p1.Y > height * 2 && p2.Y > height * 2))
+                {
+                    return;
+                }
+
+                // Иначе рисуем с обрезкой (упрощенный вариант)
+                DrawLineWithClipping(g, pen, p1, p2, width, height);
+                return;
+            }
+
+            // Если обе вершины видны или одна видна - рисуем линию
+            // Ограничиваем координаты только для рисования, не изменяя исходные
+            int x1 = Math.Max(0, Math.Min(width, p1.X));
+            int y1 = Math.Max(0, Math.Min(height, p1.Y));
+            int x2 = Math.Max(0, Math.Min(width, p2.X));
+            int y2 = Math.Max(0, Math.Min(height, p2.Y));
+
+            g.DrawLine(pen, x1, y1, x2, y2);
+        }
+
+        private bool IsPointVisible(Vector2 point, int width, int height)
+        {
+            return point.X >= 0 && point.X < width && point.Y >= 0 && point.Y < height;
+        }
+
+        private void DrawLineWithClipping(Graphics g, Pen pen, Vector2 p1, Vector2 p2, int width, int height)
+        {
+            // Упрощенный алгоритм Cohen-Sutherland для обрезки линии
+            int code1 = ComputeOutCode(p1, width, height);
+            int code2 = ComputeOutCode(p2, width, height);
+
+            float x1 = p1.X, y1 = p1.Y;
+            float x2 = p2.X, y2 = p2.Y;
+
+            while (true)
+            {
+                if ((code1 | code2) == 0)
+                {
+                    // Линия полностью видима
+                    g.DrawLine(pen, x1, y1, x2, y2);
+                    break;
+                }
+                if ((code1 & code2) != 0)
+                {
+                    // Линия полностью невидима
+                    break;
+                }
+
+                int code = code1 != 0 ? code1 : code2;
+                float x = 0, y = 0;
+
+                if ((code & 8) != 0) // выше
+                {
+                    x = x1 + (x2 - x1) * (height - y1) / (y2 - y1);
+                    y = height;
+                }
+                else if ((code & 4) != 0) // ниже
+                {
+                    x = x1 + (x2 - x1) * (0 - y1) / (y2 - y1);
+                    y = 0;
+                }
+                else if ((code & 2) != 0) // правее
+                {
+                    y = y1 + (y2 - y1) * (width - x1) / (x2 - x1);
+                    x = width;
+                }
+                else if ((code & 1) != 0) // левее
+                {
+                    y = y1 + (y2 - y1) * (0 - x1) / (x2 - x1);
+                    x = 0;
+                }
+
+                if (code == code1)
+                {
+                    x1 = x;
+                    y1 = y;
+                    code1 = ComputeOutCode(new Vector2((int)x1, (int)y1), width, height);
+                }
+                else
+                {
+                    x2 = x;
+                    y2 = y;
+                    code2 = ComputeOutCode(new Vector2((int)x2, (int)y2), width, height);
+                }
+            }
+        }
+
+        private int ComputeOutCode(Vector2 point, int width, int height)
+        {
+            int code = 0;
+            if (point.X < 0) code |= 1;  // левее
+            else if (point.X > width) code |= 2;  // правее
+            if (point.Y < 0) code |= 4;  // ниже
+            else if (point.Y > height) code |= 8;  // выше
+            return code;
         }
 
         private Ray GetRayFromScreenCoords(int x, int y, Vector3 cameraPos)
