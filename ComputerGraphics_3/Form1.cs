@@ -456,8 +456,8 @@ namespace ComputerGraphics_3
             Bitmap contourBmp = new Bitmap(contourWidth, contourHeight);
             using (Graphics g = Graphics.FromImage(contourBmp))
             {
-                g.Clear(Color.Black);
-                using (Pen whitePen = new Pen(Color.White, 2))
+                g.Clear(Color.White);
+                using (Pen whitePen = new Pen(Color.Black, 2))
                 {
                     Vector3 cameraPos = new Vector3(
                         float.Parse(textBoxCameraX.Text),
