@@ -62,7 +62,7 @@ namespace ComputerGraphics_3
 
 
             sceneObjects.Add(new Cube(1, "Cube1", new Vector3(-2, -2, -2), 2, new Color[] { Color.Red, Color.Green, Color.Blue }));
-            sceneObjects.Add(new Sphere(2, "Sphere1", new Vector3(2, 2, 2), 1.5f, new Color[] { Color.Blue}));
+            sceneObjects.Add(new Sphere(2, "Sphere1", new Vector3(2, 2, 2), 1.5f, new Color[] { Color.Blue }));
             nextObjectId = 3;
 
             UpdateObjectsList();
@@ -174,7 +174,7 @@ namespace ComputerGraphics_3
         private void AddNewObject()
         {
             Color randomColor = Color.Gray;
-            if ((comboBoxTypeOfObject.SelectedItem == null )||( comboBoxTypeOfObject.SelectedItem.ToString() == "Sphere"))
+            if ((comboBoxTypeOfObject.SelectedItem == null) || (comboBoxTypeOfObject.SelectedItem.ToString() == "Sphere"))
             {
                 Sphere newSphere = new Sphere(nextObjectId++, $"NewObject{nextObjectId - 1}", new Vector3(0, 0, 0), 1, new Color[] { randomColor });
                 sceneObjects.Add(newSphere);
@@ -240,13 +240,13 @@ namespace ComputerGraphics_3
             }
             else if (aColor.Success && bColor.Success && cColor.Success)
             {
-                activeObject.Colors = new Color[] { activeObject.StrToColor(aColor.ToString()), 
+                activeObject.Colors = new Color[] { activeObject.StrToColor(aColor.ToString()),
                     activeObject.StrToColor(bColor.ToString()) ,
                     activeObject.StrToColor(cColor.ToString()) };
             }
             else if (aColor.Success && activeObject is Sphere)
             {
-                activeObject.Colors = new Color[] { activeObject.StrToColor(aColor.ToString())};
+                activeObject.Colors = new Color[] { activeObject.StrToColor(aColor.ToString()) };
             }
 
             UpdateObjectsList();
@@ -303,7 +303,7 @@ namespace ComputerGraphics_3
             string type;
             if (activeObject is Cube)
                 type = "Cube";
-            else if(activeObject is Sphere)
+            else if (activeObject is Sphere)
                 type = "Sphere";
             else if (activeObject is Pyramid)
                 type = "Pyramid";
@@ -323,11 +323,11 @@ namespace ComputerGraphics_3
                 $"Colors\r\n" +
                 $"{{\r\n" +
                 $"    Color.A:{activeObject.ColorToStr(activeObject.Colors[0])}\r\n" +
-                (activeObject.Colors.Length > 1?
+                (activeObject.Colors.Length > 1 ?
                 $"    Color.B:{activeObject.ColorToStr(activeObject.Colors[1])}\r\n" +
                 $"    Color.C:{activeObject.ColorToStr(activeObject.Colors[2])}\r\n" : "") +
                 (activeObject.Colors.Length > 3 ?
-                $"    Color.D:{activeObject.ColorToStr(activeObject.Colors[3])}\r\n" : "" ) +
+                $"    Color.D:{activeObject.ColorToStr(activeObject.Colors[3])}\r\n" : "") +
                 $"}}\r\n.";
         }
 
@@ -335,15 +335,15 @@ namespace ComputerGraphics_3
         {
             cameraDistance = float.Parse(textBoxCameraDistance.Text);
             cameraAngle = float.Parse(textBoxCameraAngle.Text);
-            
+
             float cameraX = float.Parse(textBoxCameraX.Text);
             float cameraY = float.Parse(textBoxCameraY.Text);
             float cameraZ = float.Parse(textBoxCameraZ.Text);
 
             float radius = (float)Math.Sqrt(cameraX * cameraX + cameraY * cameraY + cameraZ * cameraZ);
 
-            cameraAngleX = (float)Math.Atan2(cameraY, cameraX); 
-            cameraAngleY = (float)Math.Asin(cameraZ / radius); 
+            cameraAngleX = (float)Math.Atan2(cameraY, cameraX);
+            cameraAngleY = (float)Math.Asin(cameraZ / radius);
 
             int newRes;
             if (int.TryParse(textBoxChuncksCountInput.Text, out newRes) && newRes >= 1 && newRes <= screenWidth)
@@ -373,13 +373,13 @@ namespace ComputerGraphics_3
             Vector3 cameraForward = (new Vector3(0, 0, 0) - cameraPos).Normalize();
 
             var visibleObjects = new List<SceneObject>();
-            float maxDistance = 50f; 
-            float cosFov = (float)Math.Cos(60 * Math.PI / 180); 
+            float maxDistance = 50f;
+            float cosFov = (float)Math.Cos(60 * Math.PI / 180);
 
             foreach (var obj in sceneObjects)
             {
                 Vector3 toObject = obj.Position - cameraPos;
-                float distance = toObject.Length(); 
+                float distance = toObject.Length();
 
                 if (distance > maxDistance) continue;
 
@@ -540,94 +540,61 @@ namespace ComputerGraphics_3
         {
             if (vertices.Count == 0) return;
 
-            // Находим bounding box только из видимых вершин
-            bool hasValidVertex = false;
+            // Используем все вершины без фильтрации
             float minX = float.MaxValue, maxX = float.MinValue;
             float minY = float.MaxValue, maxY = float.MinValue;
 
             foreach (var v in vertices)
             {
-                // Проверяем, что вершина в пределах видимой области с небольшим запасом
-                if (v.X >= -100 && v.X <= pictureBoxContur.Width + 100 &&
-                    v.Y >= -100 && v.Y <= pictureBoxContur.Height + 100)
-                {
-                    hasValidVertex = true;
-                    minX = Math.Min(minX, v.X);
-                    maxX = Math.Max(maxX, v.X);
-                    minY = Math.Min(minY, v.Y);
-                    maxY = Math.Max(maxY, v.Y);
-                }
+                // Просто находим min/max без фильтрации
+                if (v.X < minX) minX = v.X;
+                if (v.X > maxX) maxX = v.X;
+                if (v.Y < minY) minY = v.Y;
+                if (v.Y > maxY) maxY = v.Y;
             }
 
-            if (!hasValidVertex) return;
+            // Проверяем, что bounding box имеет смысл
+            if (minX == float.MaxValue || maxX == float.MinValue ||
+                minY == float.MaxValue || maxY == float.MinValue)
+                return;
 
             float centerX = (minX + maxX) / 2;
             float centerY = (minY + maxY) / 2;
             float radius = Math.Max((maxX - minX) / 2, (maxY - minY) / 2);
 
-            // Рисуем окружность только если центр в пределах экрана с запасом
-            if (radius > 0 && centerX > -radius * 2 && centerX < pictureBoxContur.Width + radius * 2 &&
-                centerY > -radius * 2 && centerY < pictureBoxContur.Height + radius * 2)
-            {
-                // Ограничиваем отрисовку, но не изменяем координаты
-                g.DrawEllipse(pen, centerX - radius, centerY - radius, radius * 2, radius * 2);
-            }
-        }
+            if (radius <= 0) return;
 
+            // Рисуем эллипс с обрезкой через Graphics container
+            // Сохраняем текущее состояние Graphics
+            var state = g.Save();
+
+            // Устанавливаем clip region для обрезки по границам pictureBox
+            g.SetClip(new Rectangle(0, 0, pictureBoxContur.Width, pictureBoxContur.Height));
+
+            // Рисуем эллипс (может быть частично за пределами, но будет обрезан clip'ом)
+            g.DrawEllipse(pen, centerX - radius, centerY - radius, radius * 2, radius * 2);
+
+            // Восстанавливаем состояние
+            g.Restore(state);
+        }
         // Добавьте этот вспомогательный метод для обрезки линий
         private void DrawLineClipped(Graphics g, Pen pen, Vector2 p1, Vector2 p2)
         {
             int width = pictureBoxContur.Width;
             int height = pictureBoxContur.Height;
 
-            // Проверяем, видна ли хотя бы одна вершина
-            bool p1Visible = IsPointVisible(p1, width, height);
-            bool p2Visible = IsPointVisible(p2, width, height);
-
-            // Если обе вершины невидимы, проверяем, пересекает ли линия видимую область
-            if (!p1Visible && !p2Visible)
-            {
-                // Простая проверка: если линия далеко за пределами, не рисуем
-                if ((p1.X < -width && p2.X < -width) || (p1.X > width * 2 && p2.X > width * 2) ||
-                    (p1.Y < -height && p2.Y < -height) || (p1.Y > height * 2 && p2.Y > height * 2))
-                {
-                    return;
-                }
-
-                // Иначе рисуем с обрезкой (упрощенный вариант)
-                DrawLineWithClipping(g, pen, p1, p2, width, height);
-                return;
-            }
-
-            // Если обе вершины видны или одна видна - рисуем линию
-            // Ограничиваем координаты только для рисования, не изменяя исходные
-            int x1 = Math.Max(0, Math.Min(width, p1.X));
-            int y1 = Math.Max(0, Math.Min(height, p1.Y));
-            int x2 = Math.Max(0, Math.Min(width, p2.X));
-            int y2 = Math.Max(0, Math.Min(height, p2.Y));
-
-            g.DrawLine(pen, x1, y1, x2, y2);
-        }
-
-        private bool IsPointVisible(Vector2 point, int width, int height)
-        {
-            return point.X >= 0 && point.X < width && point.Y >= 0 && point.Y < height;
-        }
-
-        private void DrawLineWithClipping(Graphics g, Pen pen, Vector2 p1, Vector2 p2, int width, int height)
-        {
-            // Упрощенный алгоритм Cohen-Sutherland для обрезки линии
-            int code1 = ComputeOutCode(p1, width, height);
-            int code2 = ComputeOutCode(p2, width, height);
-
             float x1 = p1.X, y1 = p1.Y;
             float x2 = p2.X, y2 = p2.Y;
+
+            // Применяем алгоритм Коэна-Сазерленда для корректной обрезки
+            int code1 = ComputeCode(x1, y1, width, height);
+            int code2 = ComputeCode(x2, y2, width, height);
 
             while (true)
             {
                 if ((code1 | code2) == 0)
                 {
-                    // Линия полностью видима
+                    // Линия полностью видима - рисуем как есть
                     g.DrawLine(pen, x1, y1, x2, y2);
                     break;
                 }
@@ -637,6 +604,7 @@ namespace ComputerGraphics_3
                     break;
                 }
 
+                // Выбираем точку за пределами экрана
                 int code = code1 != 0 ? code1 : code2;
                 float x = 0, y = 0;
 
@@ -665,26 +633,30 @@ namespace ComputerGraphics_3
                 {
                     x1 = x;
                     y1 = y;
-                    code1 = ComputeOutCode(new Vector2((int)x1, (int)y1), width, height);
+                    code1 = ComputeCode(x1, y1, width, height);
                 }
                 else
                 {
                     x2 = x;
                     y2 = y;
-                    code2 = ComputeOutCode(new Vector2((int)x2, (int)y2), width, height);
+                    code2 = ComputeCode(x2, y2, width, height);
                 }
             }
         }
 
-        private int ComputeOutCode(Vector2 point, int width, int height)
+        private int ComputeCode(float x, float y, int width, int height)
         {
             int code = 0;
-            if (point.X < 0) code |= 1;  // левее
-            else if (point.X > width) code |= 2;  // правее
-            if (point.Y < 0) code |= 4;  // ниже
-            else if (point.Y > height) code |= 8;  // выше
+            if (x < 0) code |= 1;      // левее
+            else if (x > width) code |= 2; // правее
+            if (y < 0) code |= 4;      // ниже
+            else if (y > height) code |= 8; // выше
             return code;
         }
+
+        // Этот метод больше не нужен, удалите его
+        // private void DrawLineWithClipping(...)
+
 
         private Ray GetRayFromScreenCoords(int x, int y, Vector3 cameraPos)
         {
@@ -708,7 +680,7 @@ namespace ComputerGraphics_3
 
             return new Ray(cameraPos, rayDir);
         }
-        
+
     }
     public class InputOutputTextbox : InputOutputStream
     {

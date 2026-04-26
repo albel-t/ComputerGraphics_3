@@ -131,15 +131,16 @@ namespace ComputerGraphics_3
 
     public class Cube : SceneObject
     {
-        
+
         public Cube(int id, string name, Vector3 position, float size, Color[] colors)
-            : base(id, name, position, size, colors) { 
-        
+            : base(id, name, position, size, colors)
+        {
+
         }
         public override List<Vector2> GetProjectedVertices(Vector3 cameraPos, float cameraAngle, int screenWidth, int screenHeight)
         {
             var vertices = new List<Vector3>
-            { 
+            {
                 new Vector3(Position.X - Size, Position.Y - Size, Position.Z - Size),
                 new Vector3(Position.X + Size, Position.Y - Size, Position.Z - Size),
                 new Vector3(Position.X + Size, Position.Y + Size, Position.Z - Size),
@@ -209,7 +210,7 @@ namespace ComputerGraphics_3
             if (Math.Abs(hitPoint.Y - cubeMinY) < eps || Math.Abs(hitPoint.Y - cubeMaxY) < eps)
                 return ColorIs ? Colors[1] : Color.Gray;
             if (Math.Abs(hitPoint.Z - cubeMinZ) < eps || Math.Abs(hitPoint.Z - cubeMaxZ) < eps)
-                return ColorIs ? Colors[2] : Color.Gray; 
+                return ColorIs ? Colors[2] : Color.Gray;
 
             return Color.White;
         }
@@ -399,8 +400,8 @@ namespace ComputerGraphics_3
                 for (int j = 0; j <= detail; j++)
                 {
                     float lon = (float)(2 * Math.PI * j / detail);
-                    float x =  (float)(Position.X + Size * Math.Cos(lat) * Math.Cos(lon));
-                    float y =  (float)(Position.Y + Size * Math.Sin(lat));
+                    float x = (float)(Position.X + Size * Math.Cos(lat) * Math.Cos(lon));
+                    float y = (float)(Position.Y + Size * Math.Sin(lat));
                     float z = (float)(Position.Z + Size * Math.Cos(lat) * Math.Sin(lon));
                     vertices.Add(new Vector3(x, y, z));
                 }
