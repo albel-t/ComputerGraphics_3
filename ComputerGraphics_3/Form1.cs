@@ -182,13 +182,18 @@ namespace ComputerGraphics_3
             }
             else if (comboBoxTypeOfObject.SelectedItem.ToString() == "Cube")
             {
-                Cube newCube = new Cube(nextObjectId++, $"NewObject{nextObjectId - 1}", new Vector3(0, 0, 0), 1, new Color[] { randomColor, randomColor, randomColor });
+                Color[] randomColorCube = new Color[] { Color.Red, Color.Green, Color.Blue};
+
+                Cube newCube = new Cube(nextObjectId++, $"NewObject{nextObjectId - 1}", new Vector3(0, 0, 0), 1, randomColorCube);
                 sceneObjects.Add(newCube);
                 activeObject = newCube;
             }
             else if (comboBoxTypeOfObject.SelectedItem.ToString() == "Pyramid")
             {
-                Pyramid newPyramid = new Pyramid(nextObjectId++, $"NewObject{nextObjectId - 1}", new Vector3(0, 0, 0), 1, new Color[] { randomColor, randomColor, randomColor, randomColor });
+                // Для пирамиды нужно 4 цвета (3 боковые грани + основание)
+                Color[] randomColorPyramid = new Color[] { Color.Red, Color.Green, Color.Blue, Color.Yellow };
+                Pyramid newPyramid = new Pyramid(nextObjectId++, $"NewObject{nextObjectId - 1}",
+                    new Vector3(0, 0, 0), 1.5f, randomColorPyramid);
                 sceneObjects.Add(newPyramid);
                 activeObject = newPyramid;
             }
@@ -236,7 +241,7 @@ namespace ComputerGraphics_3
                 activeObject.Colors = new Color[] { activeObject.StrToColor(aColor.ToString()),
                     activeObject.StrToColor(bColor.ToString()) ,
                     activeObject.StrToColor(cColor.ToString()) ,
-                    activeObject.StrToColor(cColor.ToString()) };
+                    activeObject.StrToColor(dColor.ToString()) };
             }
             else if (aColor.Success && bColor.Success && cColor.Success)
             {
@@ -521,21 +526,18 @@ namespace ComputerGraphics_3
 
         private void DrawPyramidContour(Graphics g, Pen pen, List<Vector2> vertices)
         {
-            if (vertices.Count < 5) return;
+            if (vertices.Count < 4) return; // Для тетраэдра нужно 4 вершины
 
-            // Основание
+            // Рисуем основание (треугольник из вершин 0,1,2)
             DrawLineClipped(g, pen, vertices[0], vertices[1]);
             DrawLineClipped(g, pen, vertices[1], vertices[2]);
+            DrawLineClipped(g, pen, vertices[2], vertices[0]);
+
+            // Рисуем ребра от основания к вершине (вершина - индекс 3)
+            DrawLineClipped(g, pen, vertices[0], vertices[3]);
+            DrawLineClipped(g, pen, vertices[1], vertices[3]);
             DrawLineClipped(g, pen, vertices[2], vertices[3]);
-            DrawLineClipped(g, pen, vertices[3], vertices[0]);
-
-            // Ребра к вершине
-            DrawLineClipped(g, pen, vertices[0], vertices[4]);
-            DrawLineClipped(g, pen, vertices[1], vertices[4]);
-            DrawLineClipped(g, pen, vertices[2], vertices[4]);
-            DrawLineClipped(g, pen, vertices[3], vertices[4]);
         }
-
         private void DrawSphereContour(Graphics g, Pen pen, List<Vector2> vertices)
         {
             if (vertices.Count == 0) return;

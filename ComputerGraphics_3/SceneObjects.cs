@@ -224,31 +224,28 @@ namespace ComputerGraphics_3
         public Pyramid(int id, string name, Vector3 position, float size, Color[] colors)
             : base(id, name, position, size, colors)
         {
-            // Инициализируем вершины относительно центра
-            // Пирамида с квадратным основанием (как египетские пирамиды)
-            float halfSize = size;
-            float height = size * 1.5f;
+            // Правильный тетраэдр с центром в начале координат
+            float a = size; // Длина ребра
+
+            // Координаты вершин правильного тетраэдра
+            float R = a * (float)Math.Sqrt(6.0) / 4.0f; // Радиус описанной сферы
+            float sqrt3 = (float)Math.Sqrt(3.0);
 
             vertices = new Vector3[]
             {
-            // Основание (квадрат)
-            new Vector3(-halfSize, -halfSize, -halfSize),  // 0: передняя левая
-            new Vector3( halfSize, -halfSize, -halfSize),  // 1: передняя правая
-            new Vector3( halfSize, -halfSize,  halfSize),  // 2: задняя правая
-            new Vector3(-halfSize, -halfSize,  halfSize),  // 3: задняя левая
-            // Вершина
-            new Vector3(0, height, 0)                       // 4: вершина
+            new Vector3(0, 0, R),                                         // 0: верхняя вершина
+            new Vector3(R * 2 * sqrt3 / 3, 0, -R / 3),                    // 1: правая нижняя
+            new Vector3(-R * sqrt3 / 3, R, -R / 3),                       // 2: левая передняя
+            new Vector3(-R * sqrt3 / 3, -R, -R / 3)                       // 3: левая задняя
             };
 
-            // Определяем грани (4 треугольные грани + основание из 2 треугольников)
+            // Определяем грани (каждая грань - треугольник)
             faces = new int[][]
             {
-            new int[] { 0, 1, 4 }, // передняя грань
-            new int[] { 1, 2, 4 }, // правая грань
-            new int[] { 2, 3, 4 }, // задняя грань
-            new int[] { 3, 0, 4 }, // левая грань
-            new int[] { 0, 2, 1 }, // основание треугольник 1
-            new int[] { 0, 3, 2 }  // основание треугольник 2
+            new int[] { 0, 1, 2 }, // грань 1
+            new int[] { 0, 2, 3 }, // грань 2
+            new int[] { 0, 3, 1 }, // грань 3
+            new int[] { 1, 3, 2 }  // основание
             };
 
             // Вычисляем нормали для каждой грани
@@ -264,11 +261,11 @@ namespace ComputerGraphics_3
                 faceNormals[i] = Vector3.Cross(edge1, edge2).Normalize();
             }
         }
+
         public override List<Vector2> GetProjectedVertices(Vector3 cameraPos, float cameraAngle, int screenWidth, int screenHeight)
         {
-            // Получаем все вершины пирамиды в мировых координатах
             var worldVertices = new List<Vector3>();
-            foreach (var vertex in vertices)  // vertices - это поле класса
+            foreach (var vertex in vertices)
             {
                 worldVertices.Add(vertex + Position);
             }
@@ -280,6 +277,8 @@ namespace ComputerGraphics_3
             t = float.MaxValue;
             hitPoint = new Vector3();
             bool hit = false;
+            float closestT = float.MaxValue;
+            Vector3 closestPoint = new Vector3();
 
             // Смещаем луч в локальные координаты пирамиды
             Ray localRay = new Ray(ray.Origin - Position, ray.Direction);
@@ -297,7 +296,7 @@ namespace ComputerGraphics_3
                 Vector3 h = Vector3.Cross(localRay.Direction, edge2);
                 float a = Vector3.Dot(edge1, h);
 
-                if (Math.Abs(a) < 0.0001f) continue; // Луч параллелен грани
+                if (Math.Abs(a) < 0.0001f) continue;
 
                 float f = 1.0f / a;
                 Vector3 s = localRay.Origin - v0;
@@ -312,17 +311,18 @@ namespace ComputerGraphics_3
 
                 float t_triangle = f * Vector3.Dot(edge2, q);
 
-                if (t_triangle > 0.0001f && t_triangle < t)
+                if (t_triangle > 0.0001f && t_triangle < closestT)
                 {
-                    t = t_triangle;
-                    hitPoint = localRay.Origin + localRay.Direction * t;
+                    closestT = t_triangle;
+                    closestPoint = localRay.Origin + localRay.Direction * t_triangle;
                     hit = true;
                 }
             }
 
             if (hit)
             {
-                hitPoint = hitPoint + Position; // Возвращаем в мировые координаты
+                t = closestT;
+                hitPoint = closestPoint + Position;
             }
 
             return hit;
@@ -330,43 +330,52 @@ namespace ComputerGraphics_3
 
         public override Color GetColor(Vector3 hitPoint, bool ColorIs = true)
         {
+            if (!ColorIs) return Color.Gray;
+
             // Переводим точку в локальные координаты
             Vector3 localPoint = hitPoint - Position;
+            float eps = 0.01f;
 
-            // Определяем, какая грань была пересечена
+            // Проверяем каждую грань
             for (int i = 0; i < faces.Length; i++)
             {
                 Vector3 v0 = vertices[faces[i][0]];
                 Vector3 v1 = vertices[faces[i][1]];
                 Vector3 v2 = vertices[faces[i][2]];
 
-                // Проверяем, лежит ли точка на грани (с небольшой погрешностью)
-                if (IsPointOnTriangle(localPoint, v0, v1, v2))
+                // Проверяем принадлежность точки грани
+                if (IsPointOnTriangle(localPoint, v0, v1, v2, eps))
                 {
-                    // Для боковых граней (0-3) используем разные цвета
-                    if (ColorIs && i < Colors.Length)
+                    // Берем цвет из родительского массива Colors
+                    Color baseColor;
+                    if (i < Colors.Length)
                     {
-                        return Colors[i % Colors.Length];
-                    }
-                    // Для основания используем отдельный цвет
-                    else if (i >= 4)
-                    {
-                        return ColorIs ? Colors[Colors.Length > 4 ? 4 : 3] : Color.Gray;
+                        baseColor = Colors[i];
                     }
                     else
                     {
-                        return ColorIs ? Colors[i % Colors.Length] : Color.Gray;
+                        // Если цветов меньше чем граней, используем первый цвет
+                        baseColor = Colors.Length > 0 ? Colors[0] : Color.Gray;
                     }
+
+                    // Добавляем затенение в зависимости от нормали
+                    Vector3 normal = faceNormals[i];
+                    float shade = Math.Max(0.3f, Math.Min(1.0f,
+                        0.5f + (normal.X + normal.Y + normal.Z) / 6.0f));
+
+                    return Color.FromArgb(
+                        (int)(baseColor.R * shade),
+                        (int)(baseColor.G * shade),
+                        (int)(baseColor.B * shade)
+                    );
                 }
             }
 
-            return Color.White;
+            return Color.Gray;
         }
 
-        private bool IsPointOnTriangle(Vector3 p, Vector3 a, Vector3 b, Vector3 c)
+        private bool IsPointOnTriangle(Vector3 p, Vector3 a, Vector3 b, Vector3 c, float eps)
         {
-            float eps = 0.001f;
-
             // Вычисляем барицентрические координаты
             Vector3 v0 = c - a;
             Vector3 v1 = b - a;
