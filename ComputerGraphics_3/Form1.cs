@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -361,7 +362,7 @@ namespace ComputerGraphics_3
                 MessageBox.Show($"Введите число от 1 до {screenWidth}");
             }
         }
-
+        /*
         private void Render()
         {
             UpdateCameraPosition();
@@ -450,6 +451,123 @@ namespace ComputerGraphics_3
             }
             RenderContours();
 
+        }
+        */
+        private void Render()
+        {
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+
+            UpdateCameraPosition();
+
+            float cameraX = float.Parse(textBoxCameraX.Text);
+            float cameraY = float.Parse(textBoxCameraY.Text);
+            float cameraZ = float.Parse(textBoxCameraZ.Text);
+            Vector3 cameraPos = new Vector3(cameraX, cameraY, cameraZ);
+
+            // Замер 1: отсечение объектов
+            var sw1 = System.Diagnostics.Stopwatch.StartNew();
+            Vector3 cameraForward = (new Vector3(0, 0, 0) - cameraPos).Normalize();
+
+            var visibleObjects = new List<SceneObject>();
+            float maxDistance = 50f;
+            float cosFov = (float)Math.Cos(60 * Math.PI / 180);
+
+            foreach (var obj in sceneObjects)
+            {
+                Vector3 toObject = obj.Position - cameraPos;
+                float distance = toObject.Length();
+                if (distance > maxDistance) continue;
+
+                Vector3 directionToObject = toObject.Normalize();
+                float dot = Vector3.Dot(cameraForward, directionToObject);
+                if (dot < cosFov) continue;
+
+                visibleObjects.Add(obj);
+            }
+            sw1.Stop();
+
+            // Замер 2: создание Bitmap
+            var sw2 = System.Diagnostics.Stopwatch.StartNew();
+            Bitmap bmp = new Bitmap(screenWidth, screenHeight);
+            sw2.Stop();
+
+            // Замер 3: трассировка лучей
+            var sw3 = System.Diagnostics.Stopwatch.StartNew();
+            int blockSize = Math.Max(1, screenWidth / renderResolution);
+            int raysCount = 0;
+
+            for (int blockY = 0; blockY < screenHeight; blockY += blockSize)
+            {
+                for (int blockX = 0; blockX < screenWidth; blockX += blockSize)
+                {
+                    int centerX = blockX + blockSize / 2;
+                    int centerY = blockY + blockSize / 2;
+
+                    if (centerX >= screenWidth) centerX = screenWidth - 1;
+                    if (centerY >= screenHeight) centerY = screenHeight - 1;
+
+                    Ray ray = GetRayFromScreenCoords(centerX, centerY, cameraPos);
+
+                    float closestT = float.MaxValue;
+                    SceneObject hitObject = null;
+                    Vector3 hitPoint = new Vector3();
+
+                    foreach (var obj in visibleObjects)
+                    {
+                        float t;
+                        Vector3 point;
+                        if (obj.Intersect(ray, out t, out point) && t > 0 && t < closestT)
+                        {
+                            closestT = t;
+                            hitObject = obj;
+                            hitPoint = point;
+                        }
+                    }
+                    raysCount++;
+
+                    Color blockColor = hitObject != null ? hitObject.GetColor(hitPoint) : Color.DarkBlue;
+
+                    for (int y = blockY; y < Math.Min(blockY + blockSize, screenHeight); y++)
+                    {
+                        for (int x = blockX; x < Math.Min(blockX + blockSize, screenWidth); x++)
+                        {
+                            bmp.SetPixel(x, y, blockColor);
+                        }
+                    }
+                }
+            }
+            sw3.Stop();
+
+            // Замер 4: отображение картинки
+            var sw4 = System.Diagnostics.Stopwatch.StartNew();
+            pictureBoxScreen.Image = bmp;
+            sw4.Stop();
+
+            // Замер 5: RenderContours
+            var sw5 = System.Diagnostics.Stopwatch.StartNew();
+            RenderContours();
+            sw5.Stop();
+
+            sw.Stop();
+
+            // ВЫВОД ВСЕХ ЗАМЕРОВ
+            Debug.WriteLine($"=== РЕНДЕРИНГ (разрешение: {renderResolution}, блоки: {blockSize}×{blockSize}) ===");
+            Debug.WriteLine($"1. Отсечение объектов: {sw1.ElapsedMilliseconds} ms");
+            Debug.WriteLine($"2. Создание Bitmap: {sw2.ElapsedMilliseconds} ms");
+            Debug.WriteLine($"3. Трассировка лучей ({raysCount} лучей): {sw3.ElapsedMilliseconds} ms");
+            Debug.WriteLine($"4. Отображение: {sw4.ElapsedMilliseconds} ms");
+            Debug.WriteLine($"5. RenderContours: {sw5.ElapsedMilliseconds} ms");
+            Debug.WriteLine($"ВСЕГО: {sw.ElapsedMilliseconds} ms");
+            Debug.WriteLine($"Объектов: {sceneObjects.Count}, Видимых: {visibleObjects.Count}\n");
+
+            frameCount++;
+            TimeSpan elapsed = DateTime.Now - lastRenderTime;
+            if (elapsed.TotalSeconds >= 1)
+            {
+                labelFPS.Text = $"FPS: {frameCount} | Obj: {sceneObjects.Count} | Visible: {visibleObjects.Count}";
+                frameCount = 0;
+                lastRenderTime = DateTime.Now;
+            }
         }
         private void RenderContours()
         {
