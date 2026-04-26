@@ -220,45 +220,53 @@ namespace ComputerGraphics_3
         private Vector3[] vertices;
         private int[][] faces;
         private Vector3[] faceNormals;
+        private Vector3[] faceCenters; // Центры граней для более точного определения
 
         public Pyramid(int id, string name, Vector3 position, float size, Color[] colors)
             : base(id, name, position, size, colors)
         {
-            // Правильный тетраэдр с центром в начале координат
-            float a = size; // Длина ребра
-
-            // Координаты вершин правильного тетраэдра
-            float R = a * (float)Math.Sqrt(6.0) / 4.0f; // Радиус описанной сферы
             float sqrt3 = (float)Math.Sqrt(3.0);
+            float sqrt6 = (float)Math.Sqrt(6.0);
 
             vertices = new Vector3[]
             {
-            new Vector3(0, 0, R),                                         // 0: верхняя вершина
-            new Vector3(R * 2 * sqrt3 / 3, 0, -R / 3),                    // 1: правая нижняя
-            new Vector3(-R * sqrt3 / 3, R, -R / 3),                       // 2: левая передняя
-            new Vector3(-R * sqrt3 / 3, -R, -R / 3)                       // 3: левая задняя
+            new Vector3(0, 0, size),                                    // 0: верхняя
+            new Vector3(0, size * sqrt6 / 3, -size * sqrt6 / 6),              // 1: нижняя передняя
+            new Vector3(-size * sqrt3 / 3, -size * sqrt6 / 6, -size * sqrt6 / 6), // 2: нижняя левая
+            new Vector3(size * sqrt3 / 3, -size * sqrt6 / 6, -size * sqrt6 / 6)   // 3: нижняя правая
             };
 
-            // Определяем грани (каждая грань - треугольник)
+            // Определяем грани
             faces = new int[][]
             {
-            new int[] { 0, 1, 2 }, // грань 1
-            new int[] { 0, 2, 3 }, // грань 2
-            new int[] { 0, 3, 1 }, // грань 3
-            new int[] { 1, 3, 2 }  // основание
+            new int[] { 0, 1, 2 }, // грань 0: передняя левая
+            new int[] { 0, 2, 3 }, // грань 1: задняя
+            new int[] { 0, 3, 1 }, // грань 2: передняя правая
+            new int[] { 1, 2, 3 }  // грань 3: основание
             };
 
-            // Вычисляем нормали для каждой грани
+            // Вычисляем нормали и центры граней
             faceNormals = new Vector3[faces.Length];
+            faceCenters = new Vector3[faces.Length];
+
             for (int i = 0; i < faces.Length; i++)
             {
                 Vector3 v0 = vertices[faces[i][0]];
                 Vector3 v1 = vertices[faces[i][1]];
                 Vector3 v2 = vertices[faces[i][2]];
 
+                // Нормаль грани
                 Vector3 edge1 = v1 - v0;
                 Vector3 edge2 = v2 - v0;
-                faceNormals[i] = Vector3.Cross(edge1, edge2).Normalize();
+                Vector3 normal = Vector3.Cross(edge1, edge2).Normalize();
+
+                // Направляем нормаль наружу
+                Vector3 center = (v0 + v1 + v2) / 3;
+                if (Vector3.Dot(normal, center) < 0)
+                    normal = normal * -1;
+
+                faceNormals[i] = normal;
+                faceCenters[i] = center;
             }
         }
 
@@ -279,18 +287,17 @@ namespace ComputerGraphics_3
             bool hit = false;
             float closestT = float.MaxValue;
             Vector3 closestPoint = new Vector3();
+            int hitFaceIndex = -1;
 
-            // Смещаем луч в локальные координаты пирамиды
             Ray localRay = new Ray(ray.Origin - Position, ray.Direction);
 
-            // Проверяем пересечение со всеми гранями
             for (int i = 0; i < faces.Length; i++)
             {
                 Vector3 v0 = vertices[faces[i][0]];
                 Vector3 v1 = vertices[faces[i][1]];
                 Vector3 v2 = vertices[faces[i][2]];
 
-                // Алгоритм Möller–Trumbore для пересечения луча с треугольником
+                // Решение системы уравнений для пересечения с треугольником
                 Vector3 edge1 = v1 - v0;
                 Vector3 edge2 = v2 - v0;
                 Vector3 h = Vector3.Cross(localRay.Direction, edge2);
@@ -315,6 +322,7 @@ namespace ComputerGraphics_3
                 {
                     closestT = t_triangle;
                     closestPoint = localRay.Origin + localRay.Direction * t_triangle;
+                    hitFaceIndex = i;
                     hit = true;
                 }
             }
@@ -323,75 +331,18 @@ namespace ComputerGraphics_3
             {
                 t = closestT;
                 hitPoint = closestPoint + Position;
+                lastHitFace = hitFaceIndex;
             }
 
             return hit;
         }
 
+        private int lastHitFace = -1;
+
         public override Color GetColor(Vector3 hitPoint, bool ColorIs = true)
         {
             if (!ColorIs) return Color.Gray;
-
-            // Переводим точку в локальные координаты
-            Vector3 localPoint = hitPoint - Position;
-            float eps = 0.01f;
-
-            // Проверяем каждую грань
-            for (int i = 0; i < faces.Length; i++)
-            {
-                Vector3 v0 = vertices[faces[i][0]];
-                Vector3 v1 = vertices[faces[i][1]];
-                Vector3 v2 = vertices[faces[i][2]];
-
-                // Проверяем принадлежность точки грани
-                if (IsPointOnTriangle(localPoint, v0, v1, v2, eps))
-                {
-                    // Берем цвет из родительского массива Colors
-                    Color baseColor;
-                    if (i < Colors.Length)
-                    {
-                        baseColor = Colors[i];
-                    }
-                    else
-                    {
-                        // Если цветов меньше чем граней, используем первый цвет
-                        baseColor = Colors.Length > 0 ? Colors[0] : Color.Gray;
-                    }
-
-                    // Добавляем затенение в зависимости от нормали
-                    Vector3 normal = faceNormals[i];
-                    float shade = Math.Max(0.3f, Math.Min(1.0f,
-                        0.5f + (normal.X + normal.Y + normal.Z) / 6.0f));
-
-                    return Color.FromArgb(
-                        (int)(baseColor.R * shade),
-                        (int)(baseColor.G * shade),
-                        (int)(baseColor.B * shade)
-                    );
-                }
-            }
-
-            return Color.Gray;
-        }
-
-        private bool IsPointOnTriangle(Vector3 p, Vector3 a, Vector3 b, Vector3 c, float eps)
-        {
-            // Вычисляем барицентрические координаты
-            Vector3 v0 = c - a;
-            Vector3 v1 = b - a;
-            Vector3 v2 = p - a;
-
-            float dot00 = Vector3.Dot(v0, v0);
-            float dot01 = Vector3.Dot(v0, v1);
-            float dot02 = Vector3.Dot(v0, v2);
-            float dot11 = Vector3.Dot(v1, v1);
-            float dot12 = Vector3.Dot(v1, v2);
-
-            float invDenom = 1.0f / (dot00 * dot11 - dot01 * dot01);
-            float u = (dot11 * dot02 - dot01 * dot12) * invDenom;
-            float v = (dot00 * dot12 - dot01 * dot02) * invDenom;
-
-            return (u >= -eps) && (v >= -eps) && (u + v <= 1.0f + eps);
+            return Colors[lastHitFace];
         }
     }
     public class Sphere : SceneObject
@@ -491,6 +442,7 @@ namespace ComputerGraphics_3
         public static Vector3 operator +(Vector3 a, Vector3 b) => new Vector3(a.X + b.X, a.Y + b.Y, a.Z + b.Z);
         public static Vector3 operator -(Vector3 a, Vector3 b) => new Vector3(a.X - b.X, a.Y - b.Y, a.Z - b.Z);
         public static Vector3 operator *(Vector3 a, float b) => new Vector3(a.X * b, a.Y * b, a.Z * b);
+        public static Vector3 operator /(Vector3 a, float b) => new Vector3(a.X / b, a.Y / b, a.Z / b);
     }
 
     public struct Ray
