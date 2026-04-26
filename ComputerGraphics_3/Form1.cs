@@ -464,10 +464,8 @@ namespace ComputerGraphics_3
             float cameraZ = float.Parse(textBoxCameraZ.Text);
             Vector3 cameraPos = new Vector3(cameraX, cameraY, cameraZ);
 
-            // Замер 1: отсечение объектов
-            var sw1 = System.Diagnostics.Stopwatch.StartNew();
+            // Отсечение объектов (быстро)
             Vector3 cameraForward = (new Vector3(0, 0, 0) - cameraPos).Normalize();
-
             var visibleObjects = new List<SceneObject>();
             float maxDistance = 50f;
             float cosFov = (float)Math.Cos(60 * Math.PI / 180);
@@ -484,18 +482,18 @@ namespace ComputerGraphics_3
 
                 visibleObjects.Add(obj);
             }
-            sw1.Stop();
 
-            // Замер 2: создание Bitmap
-            var sw2 = System.Diagnostics.Stopwatch.StartNew();
+            // Используем LockBits для быстрой работы с пикселями
             Bitmap bmp = new Bitmap(screenWidth, screenHeight);
-            sw2.Stop();
+            var rect = new Rectangle(0, 0, screenWidth, screenHeight);
+            var bmpData = bmp.LockBits(rect, System.Drawing.Imaging.ImageLockMode.WriteOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
 
-            // Замер 3: трассировка лучей
-            var sw3 = System.Diagnostics.Stopwatch.StartNew();
+            int bytesPerPixel = 4;
+            byte[] pixelData = new byte[screenWidth * screenHeight * bytesPerPixel];
+
             int blockSize = Math.Max(1, screenWidth / renderResolution);
-            int raysCount = 0;
 
+            // Предварительно вычисляем цвета блоков
             for (int blockY = 0; blockY < screenHeight; blockY += blockSize)
             {
                 for (int blockX = 0; blockX < screenWidth; blockX += blockSize)
@@ -523,42 +521,35 @@ namespace ComputerGraphics_3
                             hitPoint = point;
                         }
                     }
-                    raysCount++;
 
                     Color blockColor = hitObject != null ? hitObject.GetColor(hitPoint) : Color.DarkBlue;
 
+                    // Заполняем пиксели в массиве
                     for (int y = blockY; y < Math.Min(blockY + blockSize, screenHeight); y++)
                     {
+                        int rowOffset = y * screenWidth * bytesPerPixel;
                         for (int x = blockX; x < Math.Min(blockX + blockSize, screenWidth); x++)
                         {
-                            bmp.SetPixel(x, y, blockColor);
+                            int index = rowOffset + x * bytesPerPixel;
+                            pixelData[index] = blockColor.B;     // Blue
+                            pixelData[index + 1] = blockColor.G; // Green  
+                            pixelData[index + 2] = blockColor.R; // Red
+                            pixelData[index + 3] = blockColor.A; // Alpha
                         }
                     }
                 }
             }
-            sw3.Stop();
 
-            // Замер 4: отображение картинки
-            var sw4 = System.Diagnostics.Stopwatch.StartNew();
+            // Копируем данные в bitmap
+            System.Runtime.InteropServices.Marshal.Copy(pixelData, 0, bmpData.Scan0, pixelData.Length);
+            bmp.UnlockBits(bmpData);
+
             pictureBoxScreen.Image = bmp;
-            sw4.Stop();
 
-            // Замер 5: RenderContours
-            var sw5 = System.Diagnostics.Stopwatch.StartNew();
             RenderContours();
-            sw5.Stop();
 
             sw.Stop();
-
-            // ВЫВОД ВСЕХ ЗАМЕРОВ
-            Debug.WriteLine($"=== РЕНДЕРИНГ (разрешение: {renderResolution}, блоки: {blockSize}×{blockSize}) ===");
-            Debug.WriteLine($"1. Отсечение объектов: {sw1.ElapsedMilliseconds} ms");
-            Debug.WriteLine($"2. Создание Bitmap: {sw2.ElapsedMilliseconds} ms");
-            Debug.WriteLine($"3. Трассировка лучей ({raysCount} лучей): {sw3.ElapsedMilliseconds} ms");
-            Debug.WriteLine($"4. Отображение: {sw4.ElapsedMilliseconds} ms");
-            Debug.WriteLine($"5. RenderContours: {sw5.ElapsedMilliseconds} ms");
-            Debug.WriteLine($"ВСЕГО: {sw.ElapsedMilliseconds} ms");
-            Debug.WriteLine($"Объектов: {sceneObjects.Count}, Видимых: {visibleObjects.Count}\n");
+            Debug.WriteLine($"Рендеринг: {sw.ElapsedMilliseconds} ms");
 
             frameCount++;
             TimeSpan elapsed = DateTime.Now - lastRenderTime;
@@ -774,8 +765,6 @@ namespace ComputerGraphics_3
             return code;
         }
 
-        // Этот метод больше не нужен, удалите его
-        // private void DrawLineWithClipping(...)
 
 
         private Ray GetRayFromScreenCoords(int x, int y, Vector3 cameraPos)
