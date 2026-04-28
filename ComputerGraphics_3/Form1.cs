@@ -87,7 +87,7 @@ namespace ComputerGraphics_3
             {
                 string selectedFilePath = openFileDialog_Texture.FileName;
                 string FileName = Path.GetFileName(selectedFilePath);
-                labelTextureFileName.Text = FileName.Length > 17 ? FileName.Insert(12, "\n") : FileName;
+                comboBoxTextureFileName.Items.Add(FileName.Length > 17 ? FileName.Insert(12, "\n") : FileName);
 
                 TexturePictureBox.Image = Image.FromFile(selectedFilePath);
                 TexturePictureBox.SizeMode = PictureBoxSizeMode.Zoom;
@@ -362,97 +362,6 @@ namespace ComputerGraphics_3
                 MessageBox.Show($"Введите число от 1 до {screenWidth}");
             }
         }
-        /*
-        private void Render()
-        {
-            UpdateCameraPosition();
-
-            Bitmap bmp = new Bitmap(screenWidth, screenHeight);
-
-
-
-            float cameraX = float.Parse(textBoxCameraX.Text);
-            float cameraY = float.Parse(textBoxCameraY.Text);
-            float cameraZ = float.Parse(textBoxCameraZ.Text); ;
-            Vector3 cameraPos = new Vector3(cameraX, cameraY, cameraZ);
-
-            Vector3 cameraForward = (new Vector3(0, 0, 0) - cameraPos).Normalize();
-
-            var visibleObjects = new List<SceneObject>();
-            float maxDistance = 50f;
-            float cosFov = (float)Math.Cos(60 * Math.PI / 180);
-
-            foreach (var obj in sceneObjects)
-            {
-                Vector3 toObject = obj.Position - cameraPos;
-                float distance = toObject.Length();
-
-                if (distance > maxDistance) continue;
-
-                Vector3 directionToObject = toObject.Normalize();
-                float dot = Vector3.Dot(cameraForward, directionToObject);
-
-                if (dot < cosFov) continue;
-
-                visibleObjects.Add(obj);
-            }
-
-            int blockSize = Math.Max(1, screenWidth / renderResolution);
-
-            for (int blockY = 0; blockY < screenHeight; blockY += blockSize)
-            {
-                for (int blockX = 0; blockX < screenWidth; blockX += blockSize)
-                {
-                    int centerX = blockX + blockSize / 2;
-                    int centerY = blockY + blockSize / 2;
-
-                    if (centerX >= screenWidth) centerX = screenWidth - 1;
-                    if (centerY >= screenHeight) centerY = screenHeight - 1;
-
-                    Ray ray = GetRayFromScreenCoords(centerX, centerY, cameraPos);
-
-                    float closestT = float.MaxValue;
-                    SceneObject hitObject = null;
-                    Vector3 hitPoint = new Vector3();
-
-                    foreach (var obj in visibleObjects)
-                    {
-                        float t;
-                        Vector3 point;
-                        if (obj.Intersect(ray, out t, out point) && t > 0 && t < closestT)
-                        {
-                            closestT = t;
-                            hitObject = obj;
-                            hitPoint = point;
-                        }
-                    }
-
-                    Color blockColor = hitObject != null ? hitObject.GetColor(hitPoint) : Color.DarkBlue;
-
-                    for (int y = blockY; y < Math.Min(blockY + blockSize, screenHeight); y++)
-                    {
-                        for (int x = blockX; x < Math.Min(blockX + blockSize, screenWidth); x++)
-                        {
-                            bmp.SetPixel(x, y, blockColor);
-                        }
-                    }
-                }
-            }
-
-            pictureBoxScreen.Image = bmp;
-
-            frameCount++;
-            TimeSpan elapsed = DateTime.Now - lastRenderTime;
-            if (elapsed.TotalSeconds >= 1)
-            {
-                labelFPS.Text = $"FPS: {frameCount} | Obj: {sceneObjects.Count} | Visible: {visibleObjects.Count}";
-                frameCount = 0;
-                lastRenderTime = DateTime.Now;
-            }
-            RenderContours();
-
-        }
-        */
         private void Render()
         {
             var sw = System.Diagnostics.Stopwatch.StartNew();
@@ -547,6 +456,7 @@ namespace ComputerGraphics_3
             pictureBoxScreen.Image = bmp;
 
             RenderContours();
+            RenderTopDownView();
 
             sw.Stop();
             Debug.WriteLine($"Рендеринг: {sw.ElapsedMilliseconds} ms");
@@ -608,6 +518,206 @@ namespace ComputerGraphics_3
                 }
             }
             pictureBoxContur.Image = contourBmp;
+        }
+        // Добавьте этот метод в класс Form1
+        private void RenderTopDownView()
+        {
+            if (pictureBoxRotateCamera.Width == 0 || pictureBoxRotateCamera.Height == 0) return;
+
+            int width = pictureBoxRotateCamera.Width;
+            int height = pictureBoxRotateCamera.Height;
+
+            Bitmap topDownBmp = new Bitmap(width, height);
+            using (Graphics g = Graphics.FromImage(topDownBmp))
+            {
+
+                g.Clear(Color.White);
+                float worldSize = (float)cameraDistance * 1.5f;
+                float worldMinX = -worldSize;
+                float worldMaxX = worldSize;
+                float worldMinY = -worldSize;
+                float worldMaxY = worldSize;
+
+                using (Pen blackPen = new Pen(Color.Black, 1))
+                {
+                    foreach (var obj in sceneObjects)
+                    {
+                        List<Vector3> worldVertices = obj.GetWorldVertices();
+
+                        if (worldVertices.Count == 0) continue;
+
+                        List<Vector2> screenVertices = new List<Vector2>();
+                        foreach (var vertex in worldVertices)
+                        {
+                            int screenX = WorldToTopDownX(vertex.X, width, worldMinX, worldMaxX);
+                            int screenY = WorldToTopDownY(vertex.Y, height, worldMinY, worldMaxY);
+                            screenVertices.Add(new Vector2(screenX, screenY));
+                        }
+
+                        if (obj is Cube)
+                        {
+                            DrawCubeContourTopDown(g, blackPen, screenVertices);
+                        }
+                        else if (obj is Pyramid)
+                        {
+                            DrawPyramidContourTopDown(g, blackPen, screenVertices);
+                        }
+                        else if (obj is Sphere)
+                        {
+                            DrawSphereContourTopDown(g, blackPen, screenVertices);
+                        }
+
+                        if (activeObject != null && activeObject.Id == obj.Id)
+                        {
+                            using (Pen redPen = new Pen(Color.Red, 2))
+                            {
+                                float minX = screenVertices.Min(v => v.X);
+                                float maxX = screenVertices.Max(v => v.X);
+                                float minY = screenVertices.Min(v => v.Y);
+                                float maxY = screenVertices.Max(v => v.Y);
+
+                                g.DrawRectangle(redPen, minX - 2, minY - 2, maxX - minX + 4, maxY - minY + 4);
+                            }
+                        }
+                    }
+                }
+                Vector2 cameraXY = new Vector2(float.Parse(textBoxCameraX.Text), float.Parse(textBoxCameraY.Text));
+                Vector2 cameraDXY = new Vector2(-cameraXY.X, - cameraXY.Y);
+
+
+                Vector2 leftDir = GetDeviationPoints(cameraXY, cameraDXY, cameraAngle / 2);
+                Vector2 rightDir = GetDeviationPoints(cameraXY, cameraDXY, 360 - cameraAngle / 2);
+
+                int camScreenX = WorldToTopDownX(cameraXY.X, width, worldMinX, worldMaxX);
+                int camScreenY = WorldToTopDownY(cameraXY.Y, height, worldMinY, worldMaxY);
+
+                leftDir = new Vector2(WorldToTopDownX(leftDir.X, width, worldMinX, worldMaxX),
+                                       WorldToTopDownY(leftDir.Y, height, worldMinY, worldMaxY));
+
+                rightDir = new Vector2(WorldToTopDownX(rightDir.X, width, worldMinX, worldMaxX),
+                                       WorldToTopDownY(rightDir.Y, height, worldMinY, worldMaxY));
+
+                using (Brush cameraBrush = new SolidBrush(Color.Blue))
+                {
+                    g.FillEllipse(cameraBrush, camScreenX - 2, camScreenY - 2, 4, 4);
+                }
+
+
+
+                using (Pen fovPen = new Pen(Color.Black, 1)) 
+                {
+
+                    // Левый луч (пунктиром)
+                    fovPen.DashStyle = System.Drawing.Drawing2D.DashStyle.Dash;
+                    g.DrawLine(fovPen, camScreenX, camScreenY, leftDir.X, leftDir.Y);
+
+                    // Правый луч (пунктиром)
+                    g.DrawLine(fovPen, camScreenX, camScreenY, rightDir.X, rightDir.Y);
+                }
+            }
+
+            pictureBoxRotateCamera.Image = topDownBmp;
+        }
+
+        // Вспомогательные методы преобразования координат
+        private int WorldToTopDownX(float worldX, int screenWidth, float worldMinX, float worldMaxX)
+        {
+            float t = (worldX - worldMinX) / (worldMaxX - worldMinX);
+            return (int)Math.Max(0, Math.Min(screenWidth - 1, t * screenWidth));
+        }
+
+        private int WorldToTopDownY(float worldY, int screenHeight, float worldMinY, float worldMaxY)
+        {
+            // Инвертируем Y, потому что в экранных координатах Y растет вниз
+            float t = (worldY - worldMinY) / (worldMaxY - worldMinY);
+            return (int)Math.Max(0, Math.Min(screenHeight - 1, (1 - t) * screenHeight));
+        }
+        private void DrawCubeContourTopDown(Graphics g, Pen pen, List<Vector2> vertices)
+        {
+            if (vertices.Count < 8) return;
+
+            // Куб: вершины 0-3 нижняя грань, 4-7 верхняя грань (в зависимости от реализации)
+            // Рисуем нижнюю грань
+            DrawLineClippedMiniMap(g, pen, vertices[0], vertices[1]);
+            DrawLineClippedMiniMap(g, pen, vertices[1], vertices[2]);
+            DrawLineClippedMiniMap(g, pen, vertices[2], vertices[3]);
+            DrawLineClippedMiniMap(g, pen, vertices[3], vertices[0]);
+
+            // Рисуем верхнюю грань
+            DrawLineClippedMiniMap(g, pen, vertices[4], vertices[5]);
+            DrawLineClippedMiniMap(g, pen, vertices[5], vertices[6]);
+            DrawLineClippedMiniMap(g, pen, vertices[6], vertices[7]);
+            DrawLineClippedMiniMap(g, pen, vertices[7], vertices[4]);
+
+            // Рисуем вертикальные ребра
+            DrawLineClippedMiniMap(g, pen, vertices[0], vertices[4]);
+            DrawLineClippedMiniMap(g, pen, vertices[1], vertices[5]);
+            DrawLineClippedMiniMap(g, pen, vertices[2], vertices[6]);
+            DrawLineClippedMiniMap(g, pen, vertices[3], vertices[7]);
+        }
+
+        private void DrawPyramidContourTopDown(Graphics g, Pen pen, List<Vector2> vertices)
+        {
+            if (vertices.Count < 5) return;
+
+            // Пирамида: вершины 0-3 основание (квадрат), вершина 4 - верхушка
+            // Рисуем основание
+            DrawLineClippedMiniMap(g, pen, vertices[0], vertices[1]);
+            DrawLineClippedMiniMap(g, pen, vertices[1], vertices[2]);
+            DrawLineClippedMiniMap(g, pen, vertices[2], vertices[3]);
+            DrawLineClippedMiniMap(g, pen, vertices[3], vertices[0]);
+
+            // Рисуем ребра от основания к вершине
+            DrawLineClippedMiniMap(g, pen, vertices[0], vertices[4]);
+            DrawLineClippedMiniMap(g, pen, vertices[1], vertices[4]);
+            DrawLineClippedMiniMap(g, pen, vertices[2], vertices[4]);
+            DrawLineClippedMiniMap(g, pen, vertices[3], vertices[4]);
+        }
+
+        private void DrawSphereContourTopDown(Graphics g, Pen pen, List<Vector2> vertices)
+        {
+            if (vertices.Count == 0) return;
+
+            // Находим bounding box сферы
+            float minX = vertices.Min(v => v.X);
+            float maxX = vertices.Max(v => v.X);
+            float minY = vertices.Min(v => v.Y);
+            float maxY = vertices.Max(v => v.Y);
+
+            float centerX = (minX + maxX) / 2;
+            float centerY = (minY + maxY) / 2;
+            float radius = Math.Max((maxX - minX) / 2, (maxY - minY) / 2);
+
+            if (radius > 0)
+            {
+                g.DrawEllipse(pen, centerX - radius, centerY - radius, radius * 2, radius * 2);
+            }
+        }
+
+        private void DrawLineClippedMiniMap(Graphics g, Pen pen, Vector2 p1, Vector2 p2)
+        {
+            int width = pictureBoxRotateCamera.Width;
+            int height = pictureBoxRotateCamera.Height;
+
+            float x1 = p1.X, y1 = p1.Y;
+            float x2 = p2.X, y2 = p2.Y;
+
+            // Простая обрезка по границам
+            bool c1 = (x1 >= 0 && x1 <= width && y1 >= 0 && y1 <= height);
+            bool c2 = (x2 >= 0 && x2 <= width && y2 >= 0 && y2 <= height);
+
+            if (c1 && c2)
+            {
+                g.DrawLine(pen, x1, y1, x2, y2);
+            }
+            else if (c1 || c2)
+            {
+                try
+                {
+                    g.DrawLine(pen, x1, y1, x2, y2);
+                }
+                catch { }
+            }
         }
         private void DrawCubeContour(Graphics g, Pen pen, List<Vector2> vertices)
         {
@@ -675,20 +785,14 @@ namespace ComputerGraphics_3
 
             if (radius <= 0) return;
 
-            // Рисуем эллипс с обрезкой через Graphics container
-            // Сохраняем текущее состояние Graphics
             var state = g.Save();
 
-            // Устанавливаем clip region для обрезки по границам pictureBox
             g.SetClip(new Rectangle(0, 0, pictureBoxContur.Width, pictureBoxContur.Height));
 
-            // Рисуем эллипс (может быть частично за пределами, но будет обрезан clip'ом)
             g.DrawEllipse(pen, centerX - radius, centerY - radius, radius * 2, radius * 2);
 
-            // Восстанавливаем состояние
             g.Restore(state);
         }
-        // Добавьте этот вспомогательный метод для обрезки линий
         private void DrawLineClipped(Graphics g, Pen pen, Vector2 p1, Vector2 p2)
         {
             int width = pictureBoxContur.Width;
@@ -789,7 +893,34 @@ namespace ComputerGraphics_3
 
             return new Ray(cameraPos, rayDir);
         }
+        public static Vector2 GetDeviationPoints(Vector2 A, Vector2 B, float angleDeg = 30f)
+        {
+            float dx = B.X - A.X;
+            float dy = B.Y - A.Y;
 
+            float length = (float)Math.Sqrt(dx * dx + dy * dy);
+
+            if (length < 0.0001f)
+                return A;
+
+            // Нормализованный вектор направления AB
+            float ux = dx / length;
+            float uy = dy / length;
+
+            // Поворачиваем вектор на заданный угол
+            float angleRad = angleDeg * (float)Math.PI / 180f;
+            float cos = (float)Math.Cos(angleRad);
+            float sin = (float)Math.Sin(angleRad);
+
+            // Повернутый единичный вектор
+            float newUx = ux * cos - uy * sin;
+            float newUy = ux * sin + uy * cos;
+
+            // Новая точка B' на том же расстоянии от A, но в повернутом направлении
+            Vector2 newB = new Vector2(A.X + newUx * length, A.Y + newUy * length);
+
+            return newB;
+        }
     }
     public class InputOutputTextbox : InputOutputStream
     {
@@ -814,5 +945,7 @@ namespace ComputerGraphics_3
             console.Font = new Font("Consolas", 10);
             console.ScrollBars = RichTextBoxScrollBars.Vertical;
         }
+
     }
+
 }

@@ -63,7 +63,7 @@
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.label2 = new System.Windows.Forms.Label();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
-            this.labelTextureFileName = new System.Windows.Forms.Label();
+            this.comboBoxTextureFileName = new System.Windows.Forms.ComboBox();
             this.buttonTextureOpen = new System.Windows.Forms.Button();
             this.TexturePictureBox = new System.Windows.Forms.PictureBox();
             this.openFileDialog_Texture = new System.Windows.Forms.OpenFileDialog();
@@ -426,7 +426,7 @@
             // 
             // groupBox3
             // 
-            this.groupBox3.Controls.Add(this.labelTextureFileName);
+            this.groupBox3.Controls.Add(this.comboBoxTextureFileName);
             this.groupBox3.Controls.Add(this.buttonTextureOpen);
             this.groupBox3.Controls.Add(this.TexturePictureBox);
             this.groupBox3.Location = new System.Drawing.Point(727, 258);
@@ -436,14 +436,13 @@
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Texture";
             // 
-            // labelTextureFileName
+            // comboBoxTextureFileName
             // 
-            this.labelTextureFileName.AutoSize = true;
-            this.labelTextureFileName.Location = new System.Drawing.Point(90, 181);
-            this.labelTextureFileName.Name = "labelTextureFileName";
-            this.labelTextureFileName.Size = new System.Drawing.Size(37, 13);
-            this.labelTextureFileName.TabIndex = 21;
-            this.labelTextureFileName.Text = "-none-";
+            this.comboBoxTextureFileName.FormattingEnabled = true;
+            this.comboBoxTextureFileName.Location = new System.Drawing.Point(90, 176);
+            this.comboBoxTextureFileName.Name = "comboBoxTextureFileName";
+            this.comboBoxTextureFileName.Size = new System.Drawing.Size(87, 21);
+            this.comboBoxTextureFileName.TabIndex = 2;
             // 
             // buttonTextureOpen
             // 
@@ -607,7 +606,6 @@
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
             this.groupBox3.ResumeLayout(false);
-            this.groupBox3.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.TexturePictureBox)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxScreen)).EndInit();
             this.groupBox4.ResumeLayout(false);
@@ -673,7 +671,7 @@
         private System.Windows.Forms.TextBox textBoxCameraAngle;
         private System.Windows.Forms.TextBox textBoxCameraZ;
         private System.Windows.Forms.Label label10;
-        private System.Windows.Forms.Label labelTextureFileName;
+        private System.Windows.Forms.ComboBox comboBoxTextureFileName;
     }
 }
 

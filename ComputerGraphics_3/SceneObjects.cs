@@ -37,6 +37,7 @@ namespace ComputerGraphics_3
         {
             return new List<Vector2>();
         }
+        public abstract List<Vector3> GetWorldVertices();
 
         public Color StrToColor(string color)
         {
@@ -153,7 +154,28 @@ namespace ComputerGraphics_3
 
             return ProjectVertices(vertices, cameraPos, cameraAngle, screenWidth, screenHeight);
         }
+        public override List<Vector3> GetWorldVertices()
+        {
+            List<Vector3> vertices = new List<Vector3>();
+            float fullSize = Size; // Используем полный размер, а не половину
 
+            // 8 вершин куба от -Size/2 до Size/2
+            for (int i = -1; i <= 1; i += 2)
+            {
+                for (int j = -1; j <= 1; j += 2)
+                {
+                    for (int k = -1; k <= 1; k += 2)
+                    {
+                        // Умножаем на Size/2, чтобы получить вершины от -Size/2 до Size/2
+                        Vector3 localVertex = new Vector3(i * fullSize, j * fullSize, k * fullSize);
+                        Vector3 worldVertex = localVertex + Position;
+                        vertices.Add(worldVertex);
+                    }
+                }
+            }
+
+            return vertices;
+        }
         public override bool Intersect(Ray ray, out float t, out Vector3 hitPoint)
         {
             t = float.MaxValue;
@@ -279,7 +301,23 @@ namespace ComputerGraphics_3
             }
             return ProjectVertices(worldVertices, cameraPos, cameraAngle, screenWidth, screenHeight);
         }
+        public override List<Vector3> GetWorldVertices()
+        {
+            List<Vector3> vertices = new List<Vector3>();
+            float halfSize = Size / 2;
+            float height = Size;
 
+            // Основание (4 вершины)
+            vertices.Add(new Vector3(-halfSize, -halfSize, 0) + Position);
+            vertices.Add(new Vector3(halfSize, -halfSize, 0) + Position);
+            vertices.Add(new Vector3(halfSize, halfSize, 0) + Position);
+            vertices.Add(new Vector3(-halfSize, halfSize, 0) + Position);
+
+            // Вершина
+            vertices.Add(new Vector3(0, 0, height) + Position);
+
+            return vertices;
+        }
         public override bool Intersect(Ray ray, out float t, out Vector3 hitPoint)
         {
             t = float.MaxValue;
@@ -369,7 +407,26 @@ namespace ComputerGraphics_3
 
             return ProjectVertices(vertices, cameraPos, cameraAngle, screenWidth, screenHeight);
         }
+        public override List<Vector3> GetWorldVertices()
+        {
+            // Для сферы возвращаем точки bounding box
+            List<Vector3> vertices = new List<Vector3>();
+            float r = Size;
 
+            // 8 точек bounding box сферы
+            for (int i = -1; i <= 1; i += 2)
+            {
+                for (int j = -1; j <= 1; j += 2)
+                {
+                    for (int k = -1; k <= 1; k += 2)
+                    {
+                        vertices.Add(new Vector3(i * r, j * r, k * r) + Position);
+                    }
+                }
+            }
+
+            return vertices;
+        }
         public override bool Intersect(Ray ray, out float t, out Vector3 hitPoint)
         {
             t = 0;
@@ -453,8 +510,8 @@ namespace ComputerGraphics_3
     }
     public struct Vector2
     {
-        public int X, Y;
-        public Vector2(int x, int y) { X = x; Y = y; }
+        public float X, Y;
+        public Vector2(float x, float y) { X = x; Y = y; }
     }
 
 
