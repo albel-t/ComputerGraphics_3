@@ -140,11 +140,9 @@ namespace ComputerGraphics_3
         }
         private void PictureBox_MouseWheel(object sender, MouseEventArgs e)
         {
-            // Изменяем расстояние камеры в зависимости от направления прокрутки
             float zoomSpeed = 0.5f;
             cameraDistance -= e.Delta * zoomSpeed / 120; // e.Delta: +120 (вверх), -120 (вниз)
 
-            // Ограничиваем расстояние, чтобы камера не улетела слишком далеко или не приблизилась слишком близко
             cameraDistance = Math.Max(3, Math.Min(50, cameraDistance));
             textBoxCameraDistance.Text = cameraDistance.ToString();
             UpdateCameraPosition();
@@ -191,7 +189,6 @@ namespace ComputerGraphics_3
             }
             else if (comboBoxTypeOfObject.SelectedItem.ToString() == "Pyramid")
             {
-                // Для пирамиды нужно 4 цвета (3 боковые грани + основание)
                 Color[] randomColorPyramid = new Color[] { Color.Red, Color.Green, Color.Blue, Color.Yellow };
                 Pyramid newPyramid = new Pyramid(nextObjectId++, $"NewObject{nextObjectId - 1}",
                     new Vector3(0, 0, 0), 1.5f, randomColorPyramid);
@@ -392,32 +389,42 @@ namespace ComputerGraphics_3
                 visibleObjects.Add(obj);
             }
 
-            // Используем LockBits для быстрой работы с пикселями
             Bitmap bmp = new Bitmap(screenWidth, screenHeight);
+            Bitmap graybmp = new Bitmap(screenWidth, screenHeight);
             var rect = new Rectangle(0, 0, screenWidth, screenHeight);
             var bmpData = bmp.LockBits(rect, System.Drawing.Imaging.ImageLockMode.WriteOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            var graybmpData = graybmp.LockBits(rect, System.Drawing.Imaging.ImageLockMode.WriteOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
 
             int bytesPerPixel = 4;
             byte[] pixelData = new byte[screenWidth * screenHeight * bytesPerPixel];
+            byte[] pixelgrayData = new byte[((screenWidth+9) * (screenHeight+9) * bytesPerPixel) / 9];
 
             int blockSize = Math.Max(1, screenWidth / renderResolution);
 
-            // Предварительно вычисляем цвета блоков
+
+            Ray ray;
+            SceneObject hitObject;
+            Vector3 hitPoint;
+            int centerX;
+            int centerY;
+
+            Color blockColor;
+            Color blockColor_mini;
             for (int blockY = 0; blockY < screenHeight; blockY += blockSize)
             {
                 for (int blockX = 0; blockX < screenWidth; blockX += blockSize)
                 {
-                    int centerX = blockX + blockSize / 2;
-                    int centerY = blockY + blockSize / 2;
+                    centerX = blockX + blockSize / 2;
+                    centerY = blockY + blockSize / 2;
 
                     if (centerX >= screenWidth) centerX = screenWidth - 1;
                     if (centerY >= screenHeight) centerY = screenHeight - 1;
 
-                    Ray ray = GetRayFromScreenCoords(centerX, centerY, cameraPos);
+                    ray = GetRayFromScreenCoords(centerX, centerY, cameraPos);
 
                     float closestT = float.MaxValue;
-                    SceneObject hitObject = null;
-                    Vector3 hitPoint = new Vector3();
+                    hitObject = null;
+                    hitPoint = new Vector3();
 
                     foreach (var obj in visibleObjects)
                     {
@@ -431,29 +438,48 @@ namespace ComputerGraphics_3
                         }
                     }
 
-                    Color blockColor = hitObject != null ? hitObject.GetColor(hitPoint) : Color.DarkBlue;
+                    blockColor = Color.LightGray;
+                    blockColor_mini = Color.White;
+                    if (hitObject != null)
+                    {
+                        blockColor = hitObject.GetColor(hitPoint);
+                        if(blockX%3 == 0 && blockY%3 == 0)
+                            blockColor_mini = hitObject.GetColor(hitPoint, false);
+                    }
 
-                    // Заполняем пиксели в массиве
+
                     for (int y = blockY; y < Math.Min(blockY + blockSize, screenHeight); y++)
                     {
                         int rowOffset = y * screenWidth * bytesPerPixel;
+                        int rowOffset_mini = Math.Min(y / 3 , screenHeight / 3) * screenWidth / 3 * bytesPerPixel;
                         for (int x = blockX; x < Math.Min(blockX + blockSize, screenWidth); x++)
                         {
                             int index = rowOffset + x * bytesPerPixel;
+                            int indexmini = rowOffset_mini + Math.Min(x / 3 , screenWidth / 3) * bytesPerPixel;
+
                             pixelData[index] = blockColor.B;     // Blue
                             pixelData[index + 1] = blockColor.G; // Green  
                             pixelData[index + 2] = blockColor.R; // Red
                             pixelData[index + 3] = blockColor.A; // Alpha
-                        }
+
+                            {
+                                pixelgrayData[indexmini] = blockColor_mini.B;     // Blue
+                                pixelgrayData[indexmini + 1] = blockColor_mini.G; // Green  
+                                pixelgrayData[indexmini + 2] = blockColor_mini.R; // Red
+                                pixelgrayData[indexmini + 3] = blockColor_mini.A; // Alpha
+                            }                      
+                        }                          
                     }
                 }
             }
 
-            // Копируем данные в bitmap
             System.Runtime.InteropServices.Marshal.Copy(pixelData, 0, bmpData.Scan0, pixelData.Length);
+            System.Runtime.InteropServices.Marshal.Copy(pixelgrayData, 0, graybmpData.Scan0, pixelgrayData.Length);
             bmp.UnlockBits(bmpData);
+            graybmp.UnlockBits(graybmpData);
 
             pictureBoxScreen.Image = bmp;
+            pictureBoxBWScreen.Image = graybmp;
 
             RenderContours();
             RenderTopDownView();
@@ -519,7 +545,6 @@ namespace ComputerGraphics_3
             }
             pictureBoxContur.Image = contourBmp;
         }
-        // Добавьте этот метод в класс Form1
         private void RenderTopDownView()
         {
             if (pictureBoxRotateCamera.Width == 0 || pictureBoxRotateCamera.Height == 0) return;
@@ -606,12 +631,8 @@ namespace ComputerGraphics_3
 
                 using (Pen fovPen = new Pen(Color.Black, 1)) 
                 {
-
-                    // Левый луч (пунктиром)
-                    fovPen.DashStyle = System.Drawing.Drawing2D.DashStyle.Dash;
                     g.DrawLine(fovPen, camScreenX, camScreenY, leftDir.X, leftDir.Y);
 
-                    // Правый луч (пунктиром)
                     g.DrawLine(fovPen, camScreenX, camScreenY, rightDir.X, rightDir.Y);
                 }
             }
@@ -619,7 +640,6 @@ namespace ComputerGraphics_3
             pictureBoxRotateCamera.Image = topDownBmp;
         }
 
-        // Вспомогательные методы преобразования координат
         private int WorldToTopDownX(float worldX, int screenWidth, float worldMinX, float worldMaxX)
         {
             float t = (worldX - worldMinX) / (worldMaxX - worldMinX);
@@ -628,7 +648,6 @@ namespace ComputerGraphics_3
 
         private int WorldToTopDownY(float worldY, int screenHeight, float worldMinY, float worldMaxY)
         {
-            // Инвертируем Y, потому что в экранных координатах Y растет вниз
             float t = (worldY - worldMinY) / (worldMaxY - worldMinY);
             return (int)Math.Max(0, Math.Min(screenHeight - 1, (1 - t) * screenHeight));
         }
@@ -636,7 +655,6 @@ namespace ComputerGraphics_3
         {
             if (vertices.Count < 8) return;
 
-            // Куб: вершины 0-3 нижняя грань, 4-7 верхняя грань (в зависимости от реализации)
             // Рисуем нижнюю грань
             DrawLineClippedMiniMap(g, pen, vertices[0], vertices[1]);
             DrawLineClippedMiniMap(g, pen, vertices[1], vertices[2]);

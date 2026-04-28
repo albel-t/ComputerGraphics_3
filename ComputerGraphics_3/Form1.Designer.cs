@@ -44,7 +44,6 @@
             this.label9 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
             this.textBoxCameraDistance = new System.Windows.Forms.TextBox();
-            this.labelFPS = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
@@ -55,6 +54,7 @@
             this.label3 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.pictureBoxRotateCamera = new System.Windows.Forms.PictureBox();
+            this.labelFPS = new System.Windows.Forms.Label();
             this.richTextBoxFigurePropertyOut = new System.Windows.Forms.RichTextBox();
             this.buttonAdd = new System.Windows.Forms.Button();
             this.buttonEdit = new System.Windows.Forms.Button();
@@ -77,7 +77,7 @@
             this.buttonLoad = new System.Windows.Forms.Button();
             this.buttonSave = new System.Windows.Forms.Button();
             this.richTextBoxLogsOut = new System.Windows.Forms.RichTextBox();
-            this.pictureBoxAllScreen = new System.Windows.Forms.PictureBox();
+            this.pictureBoxBWScreen = new System.Windows.Forms.PictureBox();
             this.pictureBoxContur = new System.Windows.Forms.PictureBox();
             this.pictureBoxVisibleShadow = new System.Windows.Forms.PictureBox();
             this.MouseGroupBox.SuspendLayout();
@@ -89,7 +89,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxScreen)).BeginInit();
             this.groupBox4.SuspendLayout();
             this.groupBox5.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxAllScreen)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxBWScreen)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxContur)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxVisibleShadow)).BeginInit();
             this.SuspendLayout();
@@ -193,7 +193,6 @@
             this.groupBox1.Controls.Add(this.label9);
             this.groupBox1.Controls.Add(this.label8);
             this.groupBox1.Controls.Add(this.textBoxCameraDistance);
-            this.groupBox1.Controls.Add(this.labelFPS);
             this.groupBox1.Controls.Add(this.label7);
             this.groupBox1.Controls.Add(this.label5);
             this.groupBox1.Controls.Add(this.label6);
@@ -258,15 +257,6 @@
             this.textBoxCameraDistance.Name = "textBoxCameraDistance";
             this.textBoxCameraDistance.Size = new System.Drawing.Size(33, 20);
             this.textBoxCameraDistance.TabIndex = 15;
-            // 
-            // labelFPS
-            // 
-            this.labelFPS.AutoSize = true;
-            this.labelFPS.Location = new System.Drawing.Point(12, 124);
-            this.labelFPS.Name = "labelFPS";
-            this.labelFPS.Size = new System.Drawing.Size(49, 13);
-            this.labelFPS.TabIndex = 14;
-            this.labelFPS.Text = "labelFPS";
             // 
             // label7
             // 
@@ -351,6 +341,15 @@
             this.pictureBoxRotateCamera.Size = new System.Drawing.Size(70, 70);
             this.pictureBoxRotateCamera.TabIndex = 0;
             this.pictureBoxRotateCamera.TabStop = false;
+            // 
+            // labelFPS
+            // 
+            this.labelFPS.AutoSize = true;
+            this.labelFPS.Location = new System.Drawing.Point(12, 29);
+            this.labelFPS.Name = "labelFPS";
+            this.labelFPS.Size = new System.Drawing.Size(49, 13);
+            this.labelFPS.TabIndex = 14;
+            this.labelFPS.Text = "labelFPS";
             // 
             // richTextBoxFigurePropertyOut
             // 
@@ -475,9 +474,9 @@
             // 
             // pictureBoxScreen
             // 
-            this.pictureBoxScreen.Location = new System.Drawing.Point(12, 23);
+            this.pictureBoxScreen.Location = new System.Drawing.Point(12, 67);
             this.pictureBoxScreen.Name = "pictureBoxScreen";
-            this.pictureBoxScreen.Size = new System.Drawing.Size(507, 547);
+            this.pictureBoxScreen.Size = new System.Drawing.Size(501, 501);
             this.pictureBoxScreen.TabIndex = 4;
             this.pictureBoxScreen.TabStop = false;
             // 
@@ -557,27 +556,27 @@
             this.richTextBoxLogsOut.TabIndex = 0;
             this.richTextBoxLogsOut.Text = "";
             // 
-            // pictureBoxAllScreen
+            // pictureBoxBWScreen
             // 
-            this.pictureBoxAllScreen.Location = new System.Drawing.Point(537, 36);
-            this.pictureBoxAllScreen.Name = "pictureBoxAllScreen";
-            this.pictureBoxAllScreen.Size = new System.Drawing.Size(168, 151);
-            this.pictureBoxAllScreen.TabIndex = 2;
-            this.pictureBoxAllScreen.TabStop = false;
+            this.pictureBoxBWScreen.Location = new System.Drawing.Point(537, 25);
+            this.pictureBoxBWScreen.Name = "pictureBoxBWScreen";
+            this.pictureBoxBWScreen.Size = new System.Drawing.Size(167, 167);
+            this.pictureBoxBWScreen.TabIndex = 2;
+            this.pictureBoxBWScreen.TabStop = false;
             // 
             // pictureBoxContur
             // 
-            this.pictureBoxContur.Location = new System.Drawing.Point(537, 226);
+            this.pictureBoxContur.Location = new System.Drawing.Point(537, 216);
             this.pictureBoxContur.Name = "pictureBoxContur";
-            this.pictureBoxContur.Size = new System.Drawing.Size(168, 151);
+            this.pictureBoxContur.Size = new System.Drawing.Size(167, 167);
             this.pictureBoxContur.TabIndex = 7;
             this.pictureBoxContur.TabStop = false;
             // 
             // pictureBoxVisibleShadow
             // 
-            this.pictureBoxVisibleShadow.Location = new System.Drawing.Point(537, 419);
+            this.pictureBoxVisibleShadow.Location = new System.Drawing.Point(537, 401);
             this.pictureBoxVisibleShadow.Name = "pictureBoxVisibleShadow";
-            this.pictureBoxVisibleShadow.Size = new System.Drawing.Size(168, 151);
+            this.pictureBoxVisibleShadow.Size = new System.Drawing.Size(167, 167);
             this.pictureBoxVisibleShadow.TabIndex = 8;
             this.pictureBoxVisibleShadow.TabStop = false;
             // 
@@ -588,10 +587,11 @@
             this.ClientSize = new System.Drawing.Size(1403, 582);
             this.Controls.Add(this.pictureBoxVisibleShadow);
             this.Controls.Add(this.pictureBoxContur);
-            this.Controls.Add(this.pictureBoxAllScreen);
+            this.Controls.Add(this.pictureBoxBWScreen);
             this.Controls.Add(this.groupBox5);
             this.Controls.Add(this.groupBox4);
             this.Controls.Add(this.pictureBoxScreen);
+            this.Controls.Add(this.labelFPS);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
@@ -611,10 +611,11 @@
             this.groupBox4.ResumeLayout(false);
             this.groupBox4.PerformLayout();
             this.groupBox5.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxAllScreen)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxBWScreen)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxContur)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxVisibleShadow)).EndInit();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -661,7 +662,7 @@
         private System.Windows.Forms.Button buttonSave;
         private System.Windows.Forms.RichTextBox richTextBoxLogsOut;
         private System.Windows.Forms.Button buttonLoad;
-        private System.Windows.Forms.PictureBox pictureBoxAllScreen;
+        private System.Windows.Forms.PictureBox pictureBoxBWScreen;
         private System.Windows.Forms.PictureBox pictureBoxContur;
         private System.Windows.Forms.PictureBox pictureBoxVisibleShadow;
         private System.Windows.Forms.Label labelFPS;
